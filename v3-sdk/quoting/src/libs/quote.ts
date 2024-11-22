@@ -10,12 +10,13 @@ import {
 import { getProvider } from '../libs/providers'
 import { toReadableAmount, fromReadableAmount } from '../libs/conversion'
 
-export async function quote(): Promise<string> {
+export async function quote(inputAmout: number): Promise<string> {
   const quoterContract = new ethers.Contract(
     QUOTER_CONTRACT_ADDRESS,
     Quoter.abi,
     getProvider()
   )
+  console.log(inputAmout, 1111111111)
   const poolConstants = await getPoolConstants()
 
   const quotedAmountOut = await quoterContract.callStatic.quoteExactInputSingle(
@@ -23,7 +24,7 @@ export async function quote(): Promise<string> {
     poolConstants.token1,
     poolConstants.fee,
     fromReadableAmount(
-      CurrentConfig.tokens.amountIn,
+      +inputAmout,
       CurrentConfig.tokens.in.decimals
     ).toString(),
     0
@@ -49,6 +50,7 @@ async function getPoolConstants(): Promise<{
     IUniswapV3PoolABI.abi,
     getProvider()
   )
+
   const [token0, token1, fee] = await Promise.all([
     poolContract.token0(),
     poolContract.token1(),
