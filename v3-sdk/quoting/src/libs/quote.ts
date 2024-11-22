@@ -19,16 +19,18 @@ export async function quote(inputAmout: number): Promise<string> {
   console.log(inputAmout, 1111111111)
   const poolConstants = await getPoolConstants()
 
-  const quotedAmountOut = await quoterContract.callStatic.quoteExactInputSingle(
-    poolConstants.token0,
-    poolConstants.token1,
-    poolConstants.fee,
-    fromReadableAmount(
-      +inputAmout,
-      CurrentConfig.tokens.in.decimals,
-    ).toString(),
-    0,
-  )
+  const quotedAmountOut = await quoterContract
+    .getFunction('quoteExactInputSingle')
+    .staticCall(
+      poolConstants.token0,
+      poolConstants.token1,
+      poolConstants.fee,
+      fromReadableAmount(
+        +inputAmout,
+        CurrentConfig.tokens.in.decimals,
+      ).toString(),
+      0,
+    )
 
   return toReadableAmount(quotedAmountOut, CurrentConfig.tokens.out.decimals)
 }

@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 const webpack = require('webpack');
-const CopyWebpackPlugin = require('copy-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const ESLintPlugin = require('eslint-webpack-plugin');
 const ExternalTemplateRemotesPlugin = require('external-remotes-plugin');
@@ -26,14 +25,7 @@ module.exports = (env, argv) => {
       hot: true,
       static: path.join(__dirname, 'build'),
       port: 3000,
-      proxy: [
-        {
-          target: env.DEV_SERVER || 'http://localhost:3001', // Dev1 стенд - https://calm-core-ui-dev1.oslb-dev01.corp.dev.vtb/
-          secure: false,
-          cookieDomainRewrite: 'localhost',
-          changeOrigin: true,
-        },
-      ],
+
       headers: {
         'Access-Control-Allow-Origin': '*',
       },
@@ -127,14 +119,6 @@ module.exports = (env, argv) => {
       ],
     },
     plugins: [
-      new CopyWebpackPlugin({
-        patterns: [
-          {
-            from: './public/config.js',
-            to: './',
-          },
-        ],
-      }),
       new webpack.DefinePlugin({
         'process.env': JSON.stringify(process.env),
       }),

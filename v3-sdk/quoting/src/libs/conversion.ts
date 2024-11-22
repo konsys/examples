@@ -1,12 +1,12 @@
-import { BigNumber, ethers } from 'ethers'
+import { BigNumberish, ethers } from 'ethers'
 
 const READABLE_FORM_LEN = 4
 
 export function fromReadableAmount(
   amount: number,
   decimals: number,
-): BigNumber {
-  return ethers.utils.parseUnits(amount.toString(), decimals)
+): BigNumberish {
+  return ethers.parseUnits(amount.toString(), decimals)
 }
 
 export function toReadableAmount(rawAmount: number, decimals: number): string {
