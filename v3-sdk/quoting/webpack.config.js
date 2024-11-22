@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 const webpack = require('webpack');
-const { ModuleFederationPlugin } = require('webpack').container;
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const ESLintPlugin = require('eslint-webpack-plugin');
@@ -8,8 +7,6 @@ const ExternalTemplateRemotesPlugin = require('external-remotes-plugin');
 const path = require('path');
 const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
 const ReactRefreshWebpackPlugin = require('@pmmmwh/react-refresh-webpack-plugin');
-const deps = require('./package.json').dependencies;
-const exposes = require('./exposes.json');
 require('dotenv').config({ path: './.env' });
 
 module.exports = (env, argv) => {
@@ -28,11 +25,10 @@ module.exports = (env, argv) => {
     devServer: {
       hot: true,
       static: path.join(__dirname, 'build'),
-      port: 8085,
+      port: 3000,
       proxy: [
         {
-          context: ['/ui-api-web/cross/calm'],
-          target: env.DEV_SERVER || 'http://localhost:8000', // Dev1 стенд - https://calm-core-ui-dev1.oslb-dev01.corp.dev.vtb/
+          target: env.DEV_SERVER || 'http://localhost:3001', // Dev1 стенд - https://calm-core-ui-dev1.oslb-dev01.corp.dev.vtb/
           secure: false,
           cookieDomainRewrite: 'localhost',
           changeOrigin: true,
@@ -131,75 +127,6 @@ module.exports = (env, argv) => {
       ],
     },
     plugins: [
-      new ModuleFederationPlugin({
-        name: 'calc',
-        filename: 'remoteEntry.js',
-        exposes,
-        remotes: {},
-        shared: {
-          ...deps,
-          react: {
-            singleton: true,
-            requiredVersion: deps.react,
-          },
-          'react-dom': {
-            singleton: true,
-            requiredVersion: deps['react-dom'],
-          },
-          'react-router-dom': {
-            singleton: true,
-            requiredVersion: deps['react-router-dom'],
-          },
-          'styled-components': {
-            singleton: true,
-            requiredVersion: deps['styled-components'],
-          },
-          axios: {
-            singleton: true,
-            requiredVersion: deps.axios,
-          },
-          i18next: {
-            singleton: true,
-            requiredVersion: deps.i18next,
-          },
-          'react-i18next': {
-            singleton: true,
-            requiredVersion: deps['react-i18next'],
-          },
-          antd: {
-            singleton: true,
-            requiredVersion: deps.antd,
-          },
-          'react-redux': {
-            singleton: true,
-            requiredVersion: deps['react-redux'],
-          },
-          '@reduxjs/toolkit': {
-            singleton: true,
-            requiredVersion: deps['@reduxjs/toolkit'],
-          },
-          'react-hook-form': {
-            singleton: true,
-            requiredVersion: deps['react-hook-form'],
-          },
-          '@tanstack/react-query': {
-            singleton: true,
-            requiredVersion: deps['@tanstack/react-query'],
-          },
-          '@admiral-ds/flags': {
-            requiredVersion: deps['@admiral-ds/flags'],
-          },
-          '@admiral-ds/icons': {
-            requiredVersion: deps['@admiral-ds/icons'],
-          },
-          '@admiral-ds/fonts': {
-            requiredVersion: deps['@admiral-ds/fonts'],
-          },
-          '@admiral-ds/react-ui': {
-            requiredVersion: deps['@admiral-ds/react-ui'],
-          },
-        },
-      }),
       new CopyWebpackPlugin({
         patterns: [
           {
