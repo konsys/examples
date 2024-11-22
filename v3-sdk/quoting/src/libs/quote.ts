@@ -14,7 +14,7 @@ export async function quote(inputAmout: number): Promise<string> {
   const quoterContract = new ethers.Contract(
     QUOTER_CONTRACT_ADDRESS,
     Quoter.abi,
-    getProvider()
+    getProvider(),
   )
   console.log(inputAmout, 1111111111)
   const poolConstants = await getPoolConstants()
@@ -25,9 +25,9 @@ export async function quote(inputAmout: number): Promise<string> {
     poolConstants.fee,
     fromReadableAmount(
       +inputAmout,
-      CurrentConfig.tokens.in.decimals
-    ).toString(), 
-    0
+      CurrentConfig.tokens.in.decimals,
+    ).toString(),
+    0,
   )
 
   return toReadableAmount(quotedAmountOut, CurrentConfig.tokens.out.decimals)
@@ -48,7 +48,7 @@ async function getPoolConstants(): Promise<{
   const poolContract = new ethers.Contract(
     currentPoolAddress,
     IUniswapV3PoolABI.abi,
-    getProvider()
+    getProvider(),
   )
 
   const [token0, token1, fee] = await Promise.all([
