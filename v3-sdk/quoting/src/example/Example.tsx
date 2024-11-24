@@ -3,7 +3,7 @@ import './Example.css'
 import { CurrentConfig } from '../config'
 import { quote } from '../libs/quote'
 import { Controller, useForm } from 'react-hook-form'
-import { Button, Input, Select, Typography } from 'antd'
+import { Button, Col, Input, Row, Select, Typography } from 'antd'
 import { TokensAvailable } from '../libs/constants'
 import { Token } from '@uniswap/sdk-core'
 
@@ -38,48 +38,65 @@ export const Example = () => {
     )),
   ]
   return (
-    <div className="App">
+    <Row gutter={[16, 16]} className="App">
       {CurrentConfig.rpc.mainnet === '' && (
         <Typography>Please set your mainnet RPC URL in config.ts</Typography>
       )}
-      <Select onChange={() => setUsedTokens({ ...usedTokens })}>
-        {tokensOptions}
-      </Select>
-      <Typography>
-        Quote input amount:
-        <Controller
-          name="inputAmount"
-          defaultValue={0}
-          control={control}
-          render={({ field }) => (
-            <Input
-              type="number"
-              onChange={field.onChange}
-              value={field.value}
-            />
-          )}
-        />
-        {usedTokens?.token0.name}
-      </Typography>
-      <Typography>
-        {`Quote output amount:`}
-        <Controller
-          name="outputAmount"
-          defaultValue={0}
-          control={control}
-          render={({ field }) => (
-            <Input
-              type="number"
-              onChange={field.onChange}
-              value={field.value}
-            />
-          )}
-        />
-        {usedTokens?.token1.name}
-      </Typography>
-      <Button onClick={onQuote} variant="solid">
-        Quote
-      </Button>
-    </div>
+      <Col>
+        <Select
+          style={{ width: '150px' }}
+          onChange={(v: Token) => setUsedTokens({ ...usedTokens, token0: v })}>
+          {tokensOptions}
+        </Select>
+      </Col>
+      <Col>
+        <Typography>
+          Quote input amount:
+          <Controller
+            name="inputAmount"
+            defaultValue={0}
+            control={control}
+            render={({ field }) => (
+              <Input
+                type="number"
+                onChange={field.onChange}
+                value={field.value}
+              />
+            )}
+          />
+          {usedTokens?.token0.name}
+        </Typography>
+      </Col>
+      <Col>
+        <Select
+          style={{ width: '150px' }}
+          onChange={(v: Token) => setUsedTokens({ ...usedTokens, token1: v })}>
+          {tokensOptions}
+        </Select>
+      </Col>
+      <Col>
+        <Typography>
+          {`Quote output amount:`}
+          <Controller
+            name="outputAmount"
+            defaultValue={0}
+            control={control}
+            render={({ field }) => (
+              <Input
+                type="number"
+                onChange={field.onChange}
+                value={field.value}
+              />
+            )}
+          />
+          {usedTokens?.token1.name}
+        </Typography>
+      </Col>
+      <Col>
+        <Button onClick={onQuote} variant="solid">
+          Quote
+        </Button>
+      </Col>
+    </Row>
   )
 }
