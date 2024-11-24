@@ -21,9 +21,14 @@ export async function quote(
     Quoter.abi,
     getProvider(),
   )
-  console.log(inputAmout, 1111111111)
-  const poolConstants = await getPoolConstants(token0, token1)
 
+  const poolConstants = await getPoolConstants(token0, token1)
+  console.log(1111111111, token0)
+  console.log(
+    2222222222,
+    token1,
+    fromReadableAmount(+inputAmout, token0.decimals).toString(),
+  )
   const quotedAmountOut = await quoterContract
     .getFunction('quoteExactInputSingle')
     .staticCall(
