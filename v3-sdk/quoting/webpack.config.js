@@ -1,15 +1,15 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
-const webpack = require('webpack');
-const HtmlWebpackPlugin = require('html-webpack-plugin');
-const ESLintPlugin = require('eslint-webpack-plugin');
-const ExternalTemplateRemotesPlugin = require('external-remotes-plugin');
-const path = require('path');
-const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
-const ReactRefreshWebpackPlugin = require('@pmmmwh/react-refresh-webpack-plugin');
-require('dotenv').config({ path: './.env' });
+const webpack = require('webpack')
+const HtmlWebpackPlugin = require('html-webpack-plugin')
+const ESLintPlugin = require('eslint-webpack-plugin')
+const ExternalTemplateRemotesPlugin = require('external-remotes-plugin')
+const path = require('path')
+const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin')
+const ReactRefreshWebpackPlugin = require('@pmmmwh/react-refresh-webpack-plugin')
+require('dotenv').config({ path: './.env' })
 
 module.exports = (env, argv) => {
-  const isDevelopment = argv.mode === 'development';
+  const isDevelopment = argv.mode === 'development'
   return {
     target: 'web',
     mode: isDevelopment ? 'development' : 'production',
@@ -35,10 +35,13 @@ module.exports = (env, argv) => {
         overlay: {
           errors: true,
           runtimeErrors: (error) => {
-            if (error.message === 'ResizeObserver loop completed with undelivered notifications.') {
-              return false;
+            if (
+              error.message ===
+              'ResizeObserver loop completed with undelivered notifications.'
+            ) {
+              return false
             }
-            return true;
+            return true
           },
           warnings: false,
         },
@@ -137,5 +140,5 @@ module.exports = (env, argv) => {
         cacheLocation: 'node_modules/.cache/.eslintcache',
       }),
     ].filter(Boolean),
-  };
-};
+  }
+}
