@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react'
+import React, { useCallback } from 'react'
 import './Example.css'
 import { CurrentConfig } from '../config'
 import { quote } from '../libs/quote'
@@ -10,15 +10,15 @@ import { Token } from '@uniswap/sdk-core'
 type SwapFormT = {
   inputAmount: number
   outputAmount?: number
+  token0?: Token
+  token1?: Token
 }
 
 export const Example = () => {
-  const [usedTokens, setUsedTokens] = useState<{
-    token0: Token
-    token1: Token
-  }>({ token0: TokensAvailable.WETH, token1: TokensAvailable.USDT })
   const { watch, control, setValue } = useForm<SwapFormT>({})
   const inputValue = watch('inputAmount')
+  const token0 = watch('token0')
+  const token1 = watch('token1')
 
   const onQuote = useCallback(async () => {
     const value = +inputValue
@@ -43,11 +43,19 @@ export const Example = () => {
         <Typography>Please set your mainnet RPC URL in config.ts</Typography>
       )}
       <Col>
-        <Select
-          style={{ width: '150px' }}
-          onChange={(v: Token) => setUsedTokens({ ...usedTokens, token0: v })}>
-          {tokensOptions}
-        </Select>
+        <Controller
+          name="token0"
+          defaultValue={TokensAvailable.WETH}
+          control={control}
+          render={({ field }) => (
+            <Select
+              style={{ width: '150px' }}
+              onChange={field.onChange}
+              value={field.value}>
+              {tokensOptions}
+            </Select>
+          )}
+        />
       </Col>
       <Col>
         <Typography>
@@ -64,15 +72,23 @@ export const Example = () => {
               />
             )}
           />
-          {usedTokens?.token0.name}
+          {token0?.name}
         </Typography>
       </Col>
       <Col>
-        <Select
-          style={{ width: '150px' }}
-          onChange={(v: Token) => setUsedTokens({ ...usedTokens, token1: v })}>
-          {tokensOptions}
-        </Select>
+        <Controller
+          name="token1"
+          defaultValue={TokensAvailable.USDC}
+          control={control}
+          render={({ field }) => (
+            <Select
+              style={{ width: '150px' }}
+              onChange={field.onChange}
+              value={field.value}>
+              {tokensOptions}
+            </Select>
+          )}
+        />
       </Col>
       <Col>
         <Typography>
@@ -89,7 +105,7 @@ export const Example = () => {
               />
             )}
           />
-          {usedTokens?.token1.name}
+          {token1?.name}
         </Typography>
       </Col>
       <Col>
