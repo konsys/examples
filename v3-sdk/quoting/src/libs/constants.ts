@@ -35,7 +35,7 @@ const USDT_TOKEN = new Token(
   'USD//T',
 )
 
-type TokenName = 'WETH' | 'USDC' | 'USDT'
+export type TokenName = 'WETH' | 'USDC' | 'USDT'
 
 export const TokensAvailable: TokensAvailableT = {
   WETH: WETH_TOKEN,

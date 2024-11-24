@@ -4,21 +4,26 @@ import { CurrentConfig } from '../config'
 import { quote } from '../libs/quote'
 import { Controller, useForm } from 'react-hook-form'
 import { Button, Col, Input, Row, Select, Typography } from 'antd'
-import { TokensAvailable } from '../libs/constants'
-import { Token } from '@uniswap/sdk-core'
+import { TokenName, TokensAvailable } from '../libs/constants'
 
 type SwapFormT = {
   inputAmount: number
   outputAmount?: number
-  token0?: Token
-  token1?: Token
+  tokenName0?: TokenName
+  tokenName1?: TokenName
 }
 
 export const Example = () => {
-  const { watch, control, setValue } = useForm<SwapFormT>({})
+  const { watch, control, setValue, getValues } = useForm<SwapFormT>({
+    values: {
+      inputAmount: 1000,
+      tokenName0: 'USDC',
+      tokenName1: 'WETH',
+    },
+  })
   const inputValue = watch('inputAmount')
-  const token0 = watch('token0')
-  const token1 = watch('token1')
+  const tokenName0 = watch('tokenName0')
+  const tokenName1 = watch('tokenName1')
 
   const onQuote = useCallback(async () => {
     const value = +inputValue
@@ -37,6 +42,8 @@ export const Example = () => {
       </Select.Option>
     )),
   ]
+
+  console.log(11111, getValues())
   return (
     <Row gutter={[16, 16]} className="App">
       {CurrentConfig.rpc.mainnet === '' && (
@@ -44,13 +51,12 @@ export const Example = () => {
       )}
       <Col>
         <Controller
-          name="token0"
-          defaultValue={TokensAvailable.WETH}
+          name="tokenName0"
           control={control}
           render={({ field }) => (
             <Select
               style={{ width: '150px' }}
-              onChange={field.onChange}
+              onChange={(v) => setValue('tokenName0', v)}
               value={field.value}>
               {tokensOptions}
             </Select>
@@ -72,18 +78,17 @@ export const Example = () => {
               />
             )}
           />
-          {token0?.name}
+          {tokenName0}
         </Typography>
       </Col>
       <Col>
         <Controller
-          name="token1"
-          defaultValue={TokensAvailable.USDC}
+          name="tokenName1"
           control={control}
           render={({ field }) => (
             <Select
               style={{ width: '150px' }}
-              onChange={field.onChange}
+              onChange={(v) => setValue('tokenName1', v)}
               value={field.value}>
               {tokensOptions}
             </Select>
@@ -105,7 +110,7 @@ export const Example = () => {
               />
             )}
           />
-          {token1?.name}
+          {tokenName1}
         </Typography>
       </Col>
       <Col>
