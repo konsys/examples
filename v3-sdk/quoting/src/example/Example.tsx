@@ -1,31 +1,50 @@
-import React, { useCallback } from 'react'
+import React, { useCallback, useState } from 'react'
 import './Example.css'
 import { CurrentConfig } from '../config'
 import { quote } from '../libs/quote'
 import { Controller, useForm } from 'react-hook-form'
-import { Button, Input, Typography } from 'antd'
+import { Button, Input, Select, Typography } from 'antd'
+import { TokensAvailable } from '../libs/constants'
+import { Token } from '@uniswap/sdk-core'
 
 type SwapFormT = {
   inputAmount: number
   outputAmount?: number
 }
+
 export const Example = () => {
+  const [usedTokens, setUsedTokens] = useState<{
+    token0: Token
+    token1: Token
+  }>({ token0: TokensAvailable.WETH, token1: TokensAvailable.USDT })
   const { watch, control, setValue } = useForm<SwapFormT>({})
   const inputValue = watch('inputAmount')
 
   const onQuote = useCallback(async () => {
     const value = +inputValue
     if (value > 0) {
-      const q = Number(await quote(value))
+      const q = Number(
+        await quote(value, TokensAvailable.WETH, TokensAvailable.USDT),
+      )
       setValue('outputAmount', +q)
     }
   }, [inputValue, setValue])
 
+  const tokensOptions = [
+    ...Object.entries(TokensAvailable).map(([k, v]) => (
+      <Select.Option value={k} key={k}>
+        {v.name}
+      </Select.Option>
+    )),
+  ]
   return (
     <div className="App">
       {CurrentConfig.rpc.mainnet === '' && (
         <Typography>Please set your mainnet RPC URL in config.ts</Typography>
       )}
+      <Select onChange={() => setUsedTokens({ ...usedTokens })}>
+        {tokensOptions}
+      </Select>
       <Typography>
         Quote input amount:
         <Controller
@@ -40,7 +59,7 @@ export const Example = () => {
             />
           )}
         />
-        {CurrentConfig.tokens.in.symbol}
+        {usedTokens?.token0.name}
       </Typography>
       <Typography>
         {`Quote output amount:`}
@@ -56,7 +75,7 @@ export const Example = () => {
             />
           )}
         />
-        {CurrentConfig.tokens.out.symbol}
+        {usedTokens?.token1.name}
       </Typography>
       <Button onClick={onQuote} variant="solid">
         Quote

@@ -83,7 +83,7 @@
     "lint": "eslint ./src --ext .ts,.tsx,.js.jsx",
     "lint-fix": "eslint ./src --ext .ts,.tsx,.js.jsx --quiet --fix",
     "install:chain": "curl -L https://foundry.paradigm.xyz | bash && clear && echo $0 | exec && foundryup",
-    "start:chain": "anvil --chain-id 1337 --fork-url https://mainnet.chainnodes.org/72ae682a-b3a9-4fea-8c42-60d08228ea26"
+    "chain": "anvil --chain-id 1337 --fork-url https://mainnet.chainnodes.org/72ae682a-b3a9-4fea-8c42-60d08228ea26"
   },
   "eslintConfig": {
     "extends": [
