@@ -23,6 +23,12 @@ export async function quote(
   )
 
   const poolConstants = await getPoolConstants(token0, token1)
+  console.log(1111111111, token0.symbol)
+  console.log(2222222222, token1.symbol)
+  console.log(
+    3333333333,
+    fromReadableAmount(+inputAmout, token0.decimals).toString(),
+  )
   const quotedAmountOut = await quoterContract
     .getFunction('quoteExactInputSingle')
     .staticCall(
@@ -33,6 +39,7 @@ export async function quote(
       0,
     )
 
+  console.log('quotedAmountOut', quotedAmountOut)
   return toReadableAmount(quotedAmountOut, token1.decimals)
 }
 

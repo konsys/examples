@@ -1,5 +1,5 @@
 import React, { useCallback } from 'react'
-import './Example.css'
+import './style.css'
 import { CurrentConfig } from '../config'
 import { quote } from '../libs/quote'
 import { Controller, useForm } from 'react-hook-form'
@@ -27,13 +27,17 @@ export const Example = () => {
 
   const onQuote = useCallback(async () => {
     const value = +inputValue
-    if (value > 0) {
+    if (value > 0 && tokenName0 && tokenName1 && tokenName0 !== tokenName1) {
       const q = Number(
-        await quote(value, TokensAvailable.WETH, TokensAvailable.USDT),
+        await quote(
+          value,
+          TokensAvailable[tokenName0],
+          TokensAvailable[tokenName1],
+        ),
       )
       setValue('outputAmount', +q)
     }
-  }, [inputValue, setValue])
+  }, [inputValue, setValue, tokenName0, tokenName1])
 
   const tokensOptions = [
     ...Object.entries(TokensAvailable).map(([k, v]) => (
