@@ -1,8 +1,8 @@
-import { ethers, providers } from 'ethers'
+import { ethers, Provider } from 'ethers'
 import { CurrentConfig } from '../config'
 
 // Provider Functions
 
-export function getProvider(): providers.Provider {
-  return new ethers.providers.JsonRpcProvider(CurrentConfig.rpc.local)
+export function getProvider(): Provider {
+  return new ethers.JsonRpcProvider(CurrentConfig.rpc.local)
 }

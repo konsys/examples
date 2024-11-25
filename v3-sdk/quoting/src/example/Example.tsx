@@ -3,64 +3,120 @@ import './Example.css'
 import { CurrentConfig } from '../config'
 import { quote } from '../libs/quote'
 import { Controller, useForm } from 'react-hook-form'
-import { Button, Input, Typography } from 'antd'
+import { Button, Col, Input, Row, Select, Typography } from 'antd'
+import { TokenName, TokensAvailable } from '../libs/constants'
 
 type SwapFormT = {
   inputAmount: number
   outputAmount?: number
+  tokenName0?: TokenName
+  tokenName1?: TokenName
 }
+
 export const Example = () => {
-  const { watch, control, setValue } = useForm<SwapFormT>({})
+  const { watch, control, setValue } = useForm<SwapFormT>({
+    values: {
+      inputAmount: 1000,
+      tokenName0: 'USDC',
+      tokenName1: 'WETH',
+    },
+  })
   const inputValue = watch('inputAmount')
+  const tokenName0 = watch('tokenName0')
+  const tokenName1 = watch('tokenName1')
 
   const onQuote = useCallback(async () => {
     const value = +inputValue
     if (value > 0) {
-      const q = Number(await quote(value))
+      const q = Number(
+        await quote(value, TokensAvailable.WETH, TokensAvailable.USDT),
+      )
       setValue('outputAmount', +q)
     }
   }, [inputValue, setValue])
 
+  const tokensOptions = [
+    ...Object.entries(TokensAvailable).map(([k, v]) => (
+      <Select.Option value={k} key={k}>
+        {v.name}
+      </Select.Option>
+    )),
+  ]
+
   return (
-    <div className="App">
+    <Row gutter={[16, 16]} className="App">
       {CurrentConfig.rpc.mainnet === '' && (
         <Typography>Please set your mainnet RPC URL in config.ts</Typography>
       )}
-      <Typography>
-        Quote input amount:
+      <Col>
         <Controller
-          name="inputAmount"
-          defaultValue={0}
+          name="tokenName0"
           control={control}
           render={({ field }) => (
-            <Input
-              type="number"
-              onChange={field.onChange}
-              value={field.value}
-            />
+            <Select
+              style={{ width: '150px' }}
+              onChange={(v) => setValue('tokenName0', v)}
+              value={field.value}>
+              {tokensOptions}
+            </Select>
           )}
         />
-        {CurrentConfig.tokens.in.symbol}
-      </Typography>
-      <Typography>
-        {`Quote output amount:`}
+      </Col>
+      <Col>
+        <Typography>
+          Quote input amount:
+          <Controller
+            name="inputAmount"
+            defaultValue={0}
+            control={control}
+            render={({ field }) => (
+              <Input
+                type="number"
+                onChange={field.onChange}
+                value={field.value}
+              />
+            )}
+          />
+          {tokenName0}
+        </Typography>
+      </Col>
+      <Col>
         <Controller
-          name="outputAmount"
-          defaultValue={0}
+          name="tokenName1"
           control={control}
           render={({ field }) => (
-            <Input
-              type="number"
-              onChange={field.onChange}
-              value={field.value}
-            />
+            <Select
+              style={{ width: '150px' }}
+              onChange={(v) => setValue('tokenName1', v)}
+              value={field.value}>
+              {tokensOptions}
+            </Select>
           )}
         />
-        {CurrentConfig.tokens.out.symbol}
-      </Typography>
-      <Button onClick={onQuote} variant="solid">
-        Quote
-      </Button>
-    </div>
+      </Col>
+      <Col>
+        <Typography>
+          {`Quote output amount:`}
+          <Controller
+            name="outputAmount"
+            defaultValue={0}
+            control={control}
+            render={({ field }) => (
+              <Input
+                type="number"
+                onChange={field.onChange}
+                value={field.value}
+              />
+            )}
+          />
+          {tokenName1}
+        </Typography>
+      </Col>
+      <Col>
+        <Button onClick={onQuote} variant="solid">
+          Quote
+        </Button>
+      </Col>
+    </Row>
   )
 }

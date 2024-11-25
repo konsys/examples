@@ -9,57 +9,63 @@ import {
 } from '../libs/constants'
 import { getProvider } from '../libs/providers'
 import { toReadableAmount, fromReadableAmount } from '../libs/conversion'
+import { Token } from '@uniswap/sdk-core'
 
-export async function quote(inputAmout: number): Promise<string> {
+export async function quote(
+  inputAmout: number,
+  token0: Token,
+  token1: Token,
+): Promise<string> {
   const quoterContract = new ethers.Contract(
     QUOTER_CONTRACT_ADDRESS,
     Quoter.abi,
-    getProvider()
-  )
-  console.log(inputAmout, 1111111111)
-  const poolConstants = await getPoolConstants()
-
-  const quotedAmountOut = await quoterContract.callStatic.quoteExactInputSingle(
-    poolConstants.token0,
-    poolConstants.token1,
-    poolConstants.fee,
-    fromReadableAmount(
-      +inputAmout,
-      CurrentConfig.tokens.in.decimals
-    ).toString(),
-    0
+    getProvider(),
   )
 
-  return toReadableAmount(quotedAmountOut, CurrentConfig.tokens.out.decimals)
+  const poolConstants = await getPoolConstants(token0, token1)
+  const quotedAmountOut = await quoterContract
+    .getFunction('quoteExactInputSingle')
+    .staticCall(
+      token0.address,
+      token1.address,
+      poolConstants.fee,
+      fromReadableAmount(+inputAmout, token0.decimals).toString(),
+      0,
+    )
+
+  return toReadableAmount(quotedAmountOut, token1.decimals)
 }
 
-async function getPoolConstants(): Promise<{
-  token0: string
-  token1: string
+async function getPoolConstants(
+  tokenIn0: Token,
+  tokenIn1: Token,
+): Promise<{
+  tokenOut0: Token
+  tokenOut1: Token
   fee: number
 }> {
   const currentPoolAddress = computePoolAddress({
     factoryAddress: POOL_FACTORY_CONTRACT_ADDRESS,
-    tokenA: CurrentConfig.tokens.in,
-    tokenB: CurrentConfig.tokens.out,
+    tokenA: tokenIn0,
+    tokenB: tokenIn1,
     fee: CurrentConfig.tokens.poolFee,
   })
 
   const poolContract = new ethers.Contract(
     currentPoolAddress,
     IUniswapV3PoolABI.abi,
-    getProvider()
+    getProvider(),
   )
 
-  const [token0, token1, fee] = await Promise.all([
+  const [tokenOut0, tokenOut1, fee] = await Promise.all([
     poolContract.token0(),
     poolContract.token1(),
     poolContract.fee(),
   ])
 
   return {
-    token0,
-    token1,
+    tokenOut0,
+    tokenOut1,
     fee,
   }
 }
