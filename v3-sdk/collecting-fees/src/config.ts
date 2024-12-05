@@ -37,7 +37,8 @@ export const CurrentConfig: ExampleConfig = {
   env: Environment.LOCAL,
   rpc: {
     local: 'http://localhost:8545',
-    mainnet: '',
+    mainnet:
+      'https://mainnet.chainnodes.org/72ae682a-b3a9-4fea-8c42-60d08228ea26',
   },
   wallet: {
     address: '0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266',

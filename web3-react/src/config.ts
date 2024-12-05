@@ -18,6 +18,6 @@ export const CurrentConfig: ExampleConfig = {
   chain: Chain.MAINNET,
   rpc: {
     polygon: '',
-    mainnet: '',
+    mainnet: 'https://mainnet.chainnodes.org/72ae682a-b3a9-4fea-8c42-60d08228ea26',
   },
 }
