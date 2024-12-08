@@ -19,6 +19,6 @@ root.render(
   <React.StrictMode>
     <Web3ContextProvider>
       <Example />
-    </Web3ContextProvider>
+    </Web3ContextProvider> 
   </React.StrictMode>
 )
