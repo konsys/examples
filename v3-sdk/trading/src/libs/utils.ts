@@ -24,5 +24,7 @@ export function displayTrade(trade: Trade<Token, Token, TradeType>): string {
 export function randomInteger(min: number, max: number) {
   // случайное число от min до (max+1)
   const rand = min + Math.random() * (max + 1 - min)
-  return Math.floor(rand)
+  // return Math.floor(rand)
+  console.log(Math.floor(rand))
+  return 100
 }

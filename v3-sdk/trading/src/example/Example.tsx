@@ -57,7 +57,7 @@ const Example = () => {
       address,
       CurrentConfig.tokens.out
     )
-
+    console.log(111, inBalance, outBalance)
     setTokenInBalance(inBalance)
     setTokenOutBalance(outBalance)
   }, [])
