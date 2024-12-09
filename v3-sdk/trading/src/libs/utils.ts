@@ -26,5 +26,5 @@ export function randomInteger(min: number, max: number) {
   const rand = min + Math.random() * (max + 1 - min)
   // return Math.floor(rand)
   console.log(Math.floor(rand))
-  return 100
+  return 2000
 }
