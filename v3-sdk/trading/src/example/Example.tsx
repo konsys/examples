@@ -77,6 +77,7 @@ const Example = () => {
   }, [refreshBalances])
 
   const onTrade = useCallback(async (trade: TokenTrade | undefined) => {
+    console.log(234234234, trade)
     if (trade) {
       setTxState(await executeTrade(trade))
     }
@@ -108,12 +109,13 @@ const Example = () => {
       <h3>{`Transaction State: ${txState}`}</h3>
       <h3>{`${CurrentConfig.tokens.in.symbol} Balance: ${tokenInBalance}`}</h3>
       <h3>{`${CurrentConfig.tokens.out.symbol} Balance: ${tokenOutBalance}`}</h3>
-      <button
-        onClick={() => wrapETH(100)}
+      <Button
+        onClick={() => wrapETH(1)}
         disabled={getProvider() === null || CurrentConfig.rpc.mainnet === ''}>
         <p>Wrap ETH</p>
-      </button>
-      <button
+      </Button>
+      <br />
+      <Button
         onClick={() => onTrade(trade)}
         disabled={
           trade === undefined ||
@@ -121,8 +123,8 @@ const Example = () => {
           getProvider() === null ||
           CurrentConfig.rpc.mainnet === ''
         }>
-        <p>Trade</p>
-      </button>
+        Trade
+      </Button>
     </div>
   )
 }
