@@ -96,8 +96,8 @@ const Example = () => {
           </h2>
         )}
       <h3>
-        Trading amount in: {tokensIn} {CurrentConfig.tokens.in.symbol} for{' '}
-        {CurrentConfig.tokens.out.symbol}
+        Trading amount in: {trade?.inputAmount.toExact()}{' '}
+        {CurrentConfig.tokens.in.symbol} for {CurrentConfig.tokens.out.symbol}
       </h3>
       <h3>{trade && `Constructed Trade: ${displayTrade(trade)}`}</h3>
       <Button onClick={onCreateTrade}>Create Trade</Button>
