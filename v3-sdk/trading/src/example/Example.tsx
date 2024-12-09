@@ -78,11 +78,11 @@ const Example = () => {
     setTrade(res)
   }, [refreshBalances, tokensIn])
 
-  const onTrade = useCallback(async (trade: TokenTrade | undefined) => {
+  const onTrade = useCallback(async () => {
     if (trade) {
       setTxState(await executeTrade(trade))
     }
-  }, [])
+  }, [trade])
 
   return (
     <div className="App">
@@ -117,7 +117,7 @@ const Example = () => {
       </Button>
       <br />
       <Button
-        onClick={() => onTrade(trade)}
+        onClick={() => onTrade()}
         disabled={
           trade === undefined ||
           txState === TransactionState.Sending ||
