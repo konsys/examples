@@ -1,7 +1,12 @@
 import { Token } from '@uniswap/sdk-core'
 import { FeeAmount } from '@uniswap/v3-sdk'
 
-import { USDC_TOKEN, WETH_TOKEN } from './libs/constants'
+import {
+  USDC_TOKEN,
+  USDC_TOKEN_LOCAL,
+  WETH_TOKEN,
+  WETH_TOKEN_LOCAL,
+} from './libs/constants'
 
 // Sets if the example should run locally or on chain
 export enum Environment {
@@ -35,7 +40,8 @@ export const CurrentConfig: ExampleConfig = {
   env: Environment.LOCAL,
   rpc: {
     local: 'http://localhost:8545',
-    mainnet: 'https://mainnet.chainnodes.org/72ae682a-b3a9-4fea-8c42-60d08228ea26',
+    mainnet:
+      'https://mainnet.chainnodes.org/72ae682a-b3a9-4fea-8c42-60d08228ea26',
   },
   wallet: {
     address: '0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266',
@@ -43,9 +49,9 @@ export const CurrentConfig: ExampleConfig = {
       '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80',
   },
   tokens: {
-    in: WETH_TOKEN,
+    in: WETH_TOKEN_LOCAL,
     amountIn: 1,
-    out: USDC_TOKEN,
+    out: USDC_TOKEN_LOCAL,
     poolFee: FeeAmount.MEDIUM,
   },
 }

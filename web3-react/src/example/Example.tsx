@@ -35,6 +35,8 @@ const Example = () => {
   const [blockNumber, setBlockNumber] = useState<number>(0)
   const [connectionType, setConnectionType] = useState<ConnectionType | null>(null)
 
+
+  console.log(11111111, chainId)
   // Listen for new blocks and update the wallet
   useOnBlockUpdated((blockNumber: number) => {
     setBlockNumber(blockNumber)

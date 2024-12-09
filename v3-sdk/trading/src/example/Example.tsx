@@ -1,5 +1,6 @@
 import './Example.css'
 
+import { Button } from 'antd'
 import React, { useCallback, useEffect, useState } from 'react'
 
 import { CurrentConfig, Environment } from '../config'
@@ -39,17 +40,27 @@ const Example = () => {
   // Update wallet state given a block number
   const refreshBalances = useCallback(async () => {
     const provider = getProvider()
+
     const address = getWalletAddress()
+
     if (!address || !provider) {
       return
     }
 
-    setTokenInBalance(
-      await getCurrencyBalance(provider, address, CurrentConfig.tokens.in)
+    const b = await getCurrencyBalance(
+      provider,
+      address,
+      CurrentConfig.tokens.in
     )
-    setTokenOutBalance(
-      await getCurrencyBalance(provider, address, CurrentConfig.tokens.out)
+    const c = await getCurrencyBalance(
+      provider,
+      address,
+      CurrentConfig.tokens.out
     )
+
+    console.log(222124, c, b)
+    setTokenInBalance(b)
+    setTokenOutBalance(c)
   }, [])
 
   // Event Handlers
@@ -83,13 +94,11 @@ const Example = () => {
           </h2>
         )}
       <h3>
-        Trading {CurrentConfig.tokens.amountIn} {CurrentConfig.tokens.in.symbol}{' '}
-        for {CurrentConfig.tokens.out.symbol}
+        Trading amount in: {CurrentConfig.tokens.amountIn}{' '}
+        {CurrentConfig.tokens.in.symbol} for {CurrentConfig.tokens.out.symbol}
       </h3>
       <h3>{trade && `Constructed Trade: ${displayTrade(trade)}`}</h3>
-      <button onClick={onCreateTrade}>
-        <p>Create Trade</p>
-      </button>
+      <Button onClick={onCreateTrade}>Create Trade</Button>
       <h3>{`Wallet Address: ${getWalletAddress()}`}</h3>
       {CurrentConfig.env === Environment.WALLET_EXTENSION &&
         !getWalletAddress() && (

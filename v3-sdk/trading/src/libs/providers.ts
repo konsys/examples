@@ -35,9 +35,12 @@ export function getProvider(): providers.Provider | null {
 }
 
 export function getWalletAddress(): string | null {
-  return CurrentConfig.env === Environment.WALLET_EXTENSION
-    ? walletExtensionAddress
-    : wallet.address
+  const r =
+    CurrentConfig.env === Environment.WALLET_EXTENSION
+      ? walletExtensionAddress
+      : wallet.address
+
+  return r
 }
 
 export async function sendTransaction(
