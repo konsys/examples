@@ -14,13 +14,13 @@ cast send $USDC \
 --from $BINANCE \
   "transfer(address,uint256)(bool)" --unlocked \
   $ALICE \
-  1000000
+  1234567891231230
 
 cast send $WETH \
 --from $BINANCE \
   "transfer(address,uint256)(bool)" --unlocked \
   $ALICE \
-  1000000000000
+  923456789123456789121
 
 cast call $USDC \
   "balanceOf(address)(uint256)" \

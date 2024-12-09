@@ -58,7 +58,7 @@ const Example = () => {
       CurrentConfig.tokens.out
     )
 
-    console.log(222124, c, b)
+    console.log(222124, b, c)
     setTokenInBalance(b)
     setTokenOutBalance(c)
   }, [])
