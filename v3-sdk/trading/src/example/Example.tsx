@@ -11,7 +11,7 @@ import {
   TransactionState,
 } from '../libs/providers'
 import { createTrade, executeTrade, TokenTrade } from '../libs/trading'
-import { displayTrade } from '../libs/utils'
+import { displayTrade, randomInteger } from '../libs/utils'
 import { getCurrencyBalance, wrapETH } from '../libs/wallet'
 
 const useOnBlockUpdated = (callback: (blockNumber: number) => void) => {
@@ -47,24 +47,24 @@ const Example = () => {
       return
     }
 
-    const b = await getCurrencyBalance(
+    const inBalance = await getCurrencyBalance(
       provider,
       address,
       CurrentConfig.tokens.in
     )
-    const c = await getCurrencyBalance(
+    const outBalance = await getCurrencyBalance(
       provider,
       address,
       CurrentConfig.tokens.out
     )
 
-    console.log(222124, b, c)
-    setTokenInBalance(b)
-    setTokenOutBalance(c)
+    setTokenInBalance(inBalance)
+    setTokenOutBalance(outBalance)
   }, [])
 
   // Event Handlers
 
+  const tokensIn = randomInteger(1, 1000)
   const onConnectWallet = useCallback(async () => {
     if (await connectBrowserExtensionWallet()) {
       refreshBalances()
@@ -72,12 +72,13 @@ const Example = () => {
   }, [refreshBalances])
 
   const onCreateTrade = useCallback(async () => {
-    refreshBalances()
-    setTrade(await createTrade())
-  }, [refreshBalances])
+    await refreshBalances()
+    const res = await createTrade(tokensIn)
+    console.log(11111, res)
+    setTrade(res)
+  }, [refreshBalances, tokensIn])
 
   const onTrade = useCallback(async (trade: TokenTrade | undefined) => {
-    console.log(234234234, trade)
     if (trade) {
       setTxState(await executeTrade(trade))
     }
@@ -95,8 +96,8 @@ const Example = () => {
           </h2>
         )}
       <h3>
-        Trading amount in: {CurrentConfig.tokens.amountIn}{' '}
-        {CurrentConfig.tokens.in.symbol} for {CurrentConfig.tokens.out.symbol}
+        Trading amount in: {tokensIn} {CurrentConfig.tokens.in.symbol} for{' '}
+        {CurrentConfig.tokens.out.symbol}
       </h3>
       <h3>{trade && `Constructed Trade: ${displayTrade(trade)}`}</h3>
       <Button onClick={onCreateTrade}>Create Trade</Button>

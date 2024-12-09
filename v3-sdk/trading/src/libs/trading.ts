@@ -37,7 +37,7 @@ export type TokenTrade = Trade<Token, Token, TradeType>
 
 // Trading Functions
 
-export async function createTrade(): Promise<TokenTrade> {
+export async function createTrade(tokensIn: number): Promise<TokenTrade> {
   const poolInfo = await getPoolInfo()
 
   const pool = new Pool(
@@ -55,16 +55,13 @@ export async function createTrade(): Promise<TokenTrade> {
     CurrentConfig.tokens.out
   )
 
-  const amountOut = await getOutputQuote(swapRoute)
+  const amountOut = await getOutputQuote(tokensIn, swapRoute)
 
   const uncheckedTrade = Trade.createUncheckedTrade({
     route: swapRoute,
     inputAmount: CurrencyAmount.fromRawAmount(
       CurrentConfig.tokens.in,
-      fromReadableAmount(
-        CurrentConfig.tokens.amountIn,
-        CurrentConfig.tokens.in.decimals
-      ).toString()
+      fromReadableAmount(tokensIn, CurrentConfig.tokens.in.decimals).toString()
     ),
     outputAmount: CurrencyAmount.fromRawAmount(
       CurrentConfig.tokens.out,
@@ -72,7 +69,6 @@ export async function createTrade(): Promise<TokenTrade> {
     ),
     tradeType: TradeType.EXACT_INPUT,
   })
-
   return uncheckedTrade
 }
 
@@ -118,19 +114,22 @@ export async function executeTrade(
 
 // Helper Quoting and Pool Functions
 
-async function getOutputQuote(route: Route<Currency, Currency>) {
+async function getOutputQuote(
+  inputAmount: number,
+  route: Route<Currency, Currency>
+) {
   const provider = getProvider()
 
   if (!provider) {
     throw new Error('Provider required to get pool state')
   }
 
-  const { calldata } = await SwapQuoter.quoteCallParameters(
+  const { calldata } = SwapQuoter.quoteCallParameters(
     route,
     CurrencyAmount.fromRawAmount(
       CurrentConfig.tokens.in,
       fromReadableAmount(
-        CurrentConfig.tokens.amountIn,
+        inputAmount,
         CurrentConfig.tokens.in.decimals
       ).toString()
     ),

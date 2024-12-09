@@ -28,7 +28,6 @@ export interface ExampleConfig {
   }
   tokens: {
     in: Token
-    amountIn: number
     out: Token
     poolFee: number
   }
@@ -50,7 +49,6 @@ export const CurrentConfig: ExampleConfig = {
   },
   tokens: {
     in: USDC_TOKEN,
-    amountIn: 1,
     out: WETH_TOKEN,
     poolFee: FeeAmount.MEDIUM,
   },
