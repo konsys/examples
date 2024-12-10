@@ -167,6 +167,8 @@ const Example = () => {
         disabled={getProvider() === null || CurrentConfig.rpc.mainnet === ''}>
         Trade
       </Button>
+      <br />
+      <div>{`1 ETH =  ${data?.amountOut?.toString()}`}</div>
     </div>
   )
 }
