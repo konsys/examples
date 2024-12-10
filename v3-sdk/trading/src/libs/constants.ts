@@ -12,24 +12,6 @@ export const SWAP_ROUTER_ADDRESS = '0xE592427A0AEce92De3Edee1F18E0157C05861564'
 export const WETH_CONTRACT_ADDRESS =
   '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2'
 
-// Currencies and Tokens
-
-export const WETH_TOKEN_LOCAL = new Token(
-  1337,
-  '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
-  18,
-  'WETH',
-  'Wrapped Ether'
-)
-
-export const USDC_TOKEN_LOCAL = new Token(
-  1337,
-  '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
-  6,
-  'USDC',
-  'USD//C'
-)
-
 export const WETH_TOKEN = new Token(
   SupportedChainId.MAINNET,
   '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
@@ -44,6 +26,14 @@ export const USDC_TOKEN = new Token(
   6,
   'USDC',
   'USD//C'
+)
+
+export const USDT_TOKEN = new Token(
+  SupportedChainId.MAINNET,
+  '0xdAC17F958D2ee523a2206206994597C13D831ec7',
+  6,
+  'USDT',
+  'USDT'
 )
 
 // ABI's
@@ -75,3 +65,13 @@ export const WETH_ABI = [
 export const MAX_FEE_PER_GAS = 100000000000
 export const MAX_PRIORITY_FEE_PER_GAS = 100000000000
 export const TOKEN_AMOUNT_TO_APPROVE_FOR_TRANSFER = 2000
+
+export type TokenName = 'WETH' | 'USDC' | 'USDT'
+
+export const TokensAvailable: TokensAvailableT = {
+  WETH: WETH_TOKEN,
+  USDC: USDC_TOKEN,
+  USDT: USDT_TOKEN,
+}
+
+export type TokensAvailableT = Record<TokenName, Token>

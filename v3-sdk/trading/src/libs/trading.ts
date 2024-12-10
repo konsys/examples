@@ -37,31 +37,34 @@ export type TokenTrade = Trade<Token, Token, TradeType>
 
 // Trading Functions
 
-export async function createTrade(tokensIn: number): Promise<TokenTrade> {
+export async function createTrade(
+  amountTokensIn: number,
+  tokenIn: Token,
+  tokenOut: Token
+): Promise<TokenTrade> {
   const poolInfo = await getPoolInfo()
 
   const pool = new Pool(
-    CurrentConfig.tokens.in,
-    CurrentConfig.tokens.out,
+    tokenIn,
+    tokenOut,
     CurrentConfig.tokens.poolFee,
     poolInfo.sqrtPriceX96.toString(),
     poolInfo.liquidity.toString(),
     poolInfo.tick
   )
 
-  const swapRoute = new Route(
-    [pool],
-    CurrentConfig.tokens.in,
-    CurrentConfig.tokens.out
-  )
+  const swapRoute = new Route([pool], tokenIn, tokenOut)
 
-  const amountOut = await getOutputQuote(tokensIn, swapRoute)
+  const amountOut = await getOutputQuote(amountTokensIn, swapRoute)
 
   const uncheckedTrade = Trade.createUncheckedTrade({
     route: swapRoute,
     inputAmount: CurrencyAmount.fromRawAmount(
-      CurrentConfig.tokens.in,
-      fromReadableAmount(tokensIn, CurrentConfig.tokens.in.decimals).toString()
+      tokenIn,
+      fromReadableAmount(
+        amountTokensIn,
+        CurrentConfig.tokens.in.decimals
+      ).toString()
     ),
     outputAmount: CurrencyAmount.fromRawAmount(
       CurrentConfig.tokens.out,
@@ -73,7 +76,8 @@ export async function createTrade(tokensIn: number): Promise<TokenTrade> {
 }
 
 export async function executeTrade(
-  trade: TokenTrade
+  trade: TokenTrade,
+  tokenIn: Token
 ): Promise<TransactionState> {
   const walletAddress = getWalletAddress()
   const provider = getProvider()
@@ -83,7 +87,7 @@ export async function executeTrade(
   }
 
   // Give approval to the router to spend the token
-  const tokenApproval = await getTokenTransferApproval(CurrentConfig.tokens.in)
+  const tokenApproval = await getTokenTransferApproval(tokenIn)
 
   // Fail if transfer approvals do not go through
   if (tokenApproval !== TransactionState.Sent) {
