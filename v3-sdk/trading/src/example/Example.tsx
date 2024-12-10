@@ -19,6 +19,7 @@ import {
   sleep,
 } from '../libs/utils'
 import { wrapETH } from '../libs/wallet'
+import { TokensStateT } from './types'
 
 const useOnBlockUpdated = (callback: (blockNumber: number) => void) => {
   useEffect(() => {
@@ -29,7 +30,7 @@ const useOnBlockUpdated = (callback: (blockNumber: number) => void) => {
   })
 }
 
-const getTokens = () => {
+const getTokens = (): TokensStateT => {
   const tokenIn = randomInteger(0, 100) > 50 ? USDC_TOKEN : WETH_TOKEN
   const tokenOut = tokenIn === WETH_TOKEN ? USDC_TOKEN : WETH_TOKEN
   const amountTokensIn =
@@ -39,8 +40,7 @@ const getTokens = () => {
 }
 
 const Example = () => {
-  const { tokenIn, tokenOut, amountTokensIn } = getTokens()
-
+  const [tokensState, setTokensState] = useState<TokensStateT>()
   const [trade, setTrade] = useState<TokenTrade>()
 
   const [tokenInBalance, setTokenInBalance] = useState<string>()
@@ -49,34 +49,42 @@ const Example = () => {
 
   // Listen for new blocks and update the wallet
   useOnBlockUpdated(async (blockNumber: number) => {
-    refreshBalances()
+    if (tokensState) {
+      refreshBalances(tokensState)
+    }
+
     setBlockNumber(blockNumber)
   })
 
   // Update wallet state given a block number
-  const refreshBalances = useCallback(async () => {
-    const { inBalance, outBalance } = await getUserBalance(tokenIn, tokenOut)
-    setTokenInBalance(inBalance)
-    setTokenOutBalance(outBalance)
-  }, [tokenIn, tokenOut])
+  const refreshBalances = useCallback(
+    async ({ tokenIn, tokenOut }: TokensStateT) => {
+      const { inBalance, outBalance } = await getUserBalance(tokenIn, tokenOut)
+      setTokenInBalance(inBalance)
+      setTokenOutBalance(outBalance)
+    },
+    []
+  )
 
   const onConnectWallet = useCallback(async () => {
-    if (await connectBrowserExtensionWallet()) {
-      refreshBalances()
+    if ((await connectBrowserExtensionWallet()) && tokensState) {
+      refreshBalances(tokensState)
+    }
+  }, [refreshBalances, tokensState])
+
+  const onTrade = useCallback(async () => {
+    const tState = getTokens()
+    setTokensState(tState)
+    await refreshBalances(tState)
+    const trade = await createTrade(tState)
+    setTrade(trade)
+    await sleep(500)
+
+    if (trade) {
+      await executeTrade(trade, tState.tokenIn)
     }
   }, [refreshBalances])
 
-  const onTrade = useCallback(async () => {
-    await refreshBalances()
-    const trade = await createTrade(amountTokensIn, tokenIn, tokenOut)
-    setTrade(trade)
-    await sleep(500)
-    if (trade) {
-      await executeTrade(trade, tokenIn)
-    }
-  }, [tokenIn, amountTokensIn, refreshBalances, tokenOut])
-
-  console.log(1111, trade)
   useQuery({
     queryKey: ['onTrade'],
     queryFn: async () => {
@@ -98,8 +106,8 @@ const Example = () => {
         )}
       <h3>
         Trading amount in: {trade?.inputAmount.toExact()}{' '}
-        {trade?.inputAmount.currency.name} for{' '}
-        {trade?.outputAmount.currency.name}
+        {trade?.inputAmount.currency.symbol} for{' '}
+        {trade?.outputAmount.currency.symbol}
       </h3>
       <h3>{trade && `Constructed Trade: ${displayTrade(trade)}`}</h3>
       <h3>{`Wallet Address: ${getWalletAddress()}`}</h3>
@@ -108,8 +116,8 @@ const Example = () => {
           <button onClick={onConnectWallet}>Connect Wallet</button>
         )}
       <h3>{`Block Number: ${blockNumber + 1}`}</h3>
-      <h3>{`${trade?.inputAmount.currency.name} Balance: ${tokenInBalance}`}</h3>
-      <h3>{`${trade?.inputAmount.currency.name} Balance: ${tokenOutBalance}`}</h3>
+      <h3>{`${trade?.inputAmount.currency.symbol} Balance: ${tokenInBalance}`}</h3>
+      <h3>{`${trade?.outputAmount.currency.symbol} Balance: ${tokenOutBalance}`}</h3>
       <Button
         onClick={() => wrapETH(1)}
         disabled={getProvider() === null || CurrentConfig.rpc.mainnet === ''}>

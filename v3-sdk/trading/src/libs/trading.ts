@@ -17,6 +17,7 @@ import { ethers } from 'ethers'
 import JSBI from 'jsbi'
 
 import { CurrentConfig } from '../config'
+import { TokensStateT } from '../example/types'
 import {
   ERC20_ABI,
   QUOTER_CONTRACT_ADDRESS,
@@ -37,11 +38,11 @@ export type TokenTrade = Trade<Token, Token, TradeType>
 
 // Trading Functions
 
-export async function createTrade(
-  amountTokensIn: number,
-  tokenIn: Token,
-  tokenOut: Token
-): Promise<TokenTrade> {
+export async function createTrade({
+  tokenIn,
+  tokenOut,
+  amountTokensIn,
+}: TokensStateT): Promise<TokenTrade> {
   const poolInfo = await getPoolInfo()
 
   const pool = new Pool(
