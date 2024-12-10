@@ -81,18 +81,18 @@ const Example = () => {
     await sleep(500)
 
     if (trade) {
-      await executeTrade(trade, tState.tokenIn)
+      return await executeTrade(trade, tState.tokenIn)
     }
+    return false
   }, [refreshBalances])
 
-  useQuery({
+  const { data, isFetching } = useQuery({
     queryKey: ['onTrade'],
-    queryFn: async () => {
-      await onTrade()
-    },
+    queryFn: onTrade,
     refetchInterval: 2000,
   })
 
+  console.log(234234, data, isFetching)
   return (
     <div className="App">
       {CurrentConfig.rpc.mainnet === '' && (
