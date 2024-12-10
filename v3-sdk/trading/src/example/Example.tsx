@@ -37,11 +37,11 @@ const useOnBlockUpdated = (callback: (blockNumber: number) => void) => {
 
 const getTokens = (): TokensStateT => {
   const r = randomInteger(0, 100)
-  let r1 = randomInteger(1, 10)
+  let r1 = randomInteger(1, 1000)
   const tokenIn = r > 50 ? USDC_TOKEN : WETH_TOKEN
   const tokenOut = tokenIn === WETH_TOKEN ? USDC_TOKEN : WETH_TOKEN
   if (tokenIn === WETH_TOKEN) {
-    r1 = r1 / 3900
+    r1 = r1 / 2800
   }
 
   return { tokenIn, tokenOut, amountTokensIn: r1 }
@@ -132,9 +132,8 @@ const Example = () => {
   )
 
   const { data } = useQuery({
-    queryKey: ['onTrade1'],
+    queryKey: [blockNumber],
     queryFn: q,
-    refetchInterval: 2000,
   })
   console.log(32323, data?.amountOut?.toString())
 
