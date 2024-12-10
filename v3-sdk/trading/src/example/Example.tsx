@@ -83,7 +83,7 @@ const Example = () => {
     await sleep(500)
 
     if (trade) {
-      return await executeTrade(trade, tState.tokenIn)
+      return await executeTrade(trade, tState)
     }
     return false
   }, [refreshBalances])
@@ -94,6 +94,26 @@ const Example = () => {
     refetchInterval: 2000,
   })
 
+  const showBalance = useCallback(() => {
+    let r = <span />
+    if (trade?.inputAmount.currency === USDC_TOKEN) {
+      r = (
+        <>
+          <div>{`${trade?.inputAmount.currency.symbol} Balance: ${tokenInBalance}`}</div>
+          <div>{`${trade?.outputAmount.currency.symbol} Balance: ${tokenOutBalance}`}</div>
+        </>
+      )
+    }
+    r = (
+      <>
+        <div>{`${trade?.outputAmount.currency.symbol} Balance: ${tokenOutBalance}`}</div>
+        <div>{`${trade?.inputAmount.currency.symbol} Balance: ${tokenInBalance}`}</div>
+      </>
+    )
+    return r
+  }, [trade, tokenInBalance, tokenOutBalance])
+
+  console.log(32323)
   return (
     <div className="App">
       {CurrentConfig.rpc.mainnet === '' && (
@@ -105,19 +125,14 @@ const Example = () => {
             Please install a wallet to use this example configuration
           </h2>
         )}
-      <h3>
-        Trading amount in: {trade?.inputAmount.toExact()}{' '}
-        {trade?.inputAmount.currency.symbol} for{' '}
-        {trade?.outputAmount.currency.symbol}
-      </h3>
-      <h3>{trade && `Constructed Trade: ${displayTrade(trade)}`}</h3>
+
+      <h3>{trade && ` ${displayTrade(trade)}`}</h3>
       {CurrentConfig.env === Environment.WALLET_EXTENSION &&
         !getWalletAddress() && (
           <button onClick={onConnectWallet}>Connect Wallet</button>
         )}
       <h3>{`Block Number: ${blockNumber + 1}`}</h3>
-      <h3>{`${trade?.inputAmount.currency.symbol} Balance: ${tokenInBalance}`}</h3>
-      <h3>{`${trade?.outputAmount.currency.symbol} Balance: ${tokenOutBalance}`}</h3>
+      {showBalance()}
       <Button
         onClick={() => wrapETH(1)}
         disabled={getProvider() === null || CurrentConfig.rpc.mainnet === ''}>

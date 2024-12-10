@@ -36,8 +36,6 @@ import { fromReadableAmount } from './utils'
 
 export type TokenTrade = Trade<Token, Token, TradeType>
 
-// Trading Functions
-
 export async function createTrade({
   tokenIn,
   tokenOut,
@@ -61,8 +59,6 @@ export async function createTrade({
     swapRoute
   )
 
-  console.log(111111, tokenIn.symbol)
-
   const uncheckedTrade = Trade.createUncheckedTrade({
     route: swapRoute,
     inputAmount: CurrencyAmount.fromRawAmount(
@@ -80,7 +76,7 @@ export async function createTrade({
 
 export async function executeTrade(
   trade: TokenTrade,
-  tokenIn: Token
+  tokensData: TokensStateT
 ): Promise<TransactionState> {
   const walletAddress = getWalletAddress()
   const provider = getProvider()
@@ -90,7 +86,7 @@ export async function executeTrade(
   }
 
   // Give approval to the router to spend the token
-  const tokenApproval = await getTokenTransferApproval(tokenIn)
+  const tokenApproval = await getTokenTransferApproval(tokensData)
 
   // Fail if transfer approvals do not go through
   if (tokenApproval !== TransactionState.Sent) {
@@ -155,7 +151,7 @@ async function getOutputQuote(
 }
 
 export async function getTokenTransferApproval(
-  token: Token
+  tokensData: TokensStateT
 ): Promise<TransactionState> {
   const provider = getProvider()
   const address = getWalletAddress()
@@ -166,7 +162,7 @@ export async function getTokenTransferApproval(
 
   try {
     const tokenContract = new ethers.Contract(
-      token.address,
+      tokensData.tokenIn.address,
       ERC20_ABI,
       provider
     )
@@ -174,8 +170,8 @@ export async function getTokenTransferApproval(
     const transaction = await tokenContract.populateTransaction.approve(
       SWAP_ROUTER_ADDRESS,
       fromReadableAmount(
-        TOKEN_AMOUNT_TO_APPROVE_FOR_TRANSFER,
-        token.decimals
+        tokensData.amountTokensIn,
+        tokensData.tokenIn.decimals
       ).toString()
     )
 
