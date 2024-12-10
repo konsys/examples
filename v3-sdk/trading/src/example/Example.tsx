@@ -76,12 +76,13 @@ const Example = () => {
     }
   }, [tokenIn, amountTokensIn, refreshBalances, tokenOut])
 
+  console.log(1111, trade)
   useQuery({
     queryKey: ['onTrade'],
     queryFn: async () => {
       await onTrade()
     },
-    refetchInterval: 20000,
+    refetchInterval: 2000,
   })
 
   return (
@@ -96,8 +97,9 @@ const Example = () => {
           </h2>
         )}
       <h3>
-        Trading amount in: {trade?.inputAmount.toExact()} {tokenIn.symbol} for{' '}
-        {tokenOut.symbol}
+        Trading amount in: {trade?.inputAmount.toExact()}{' '}
+        {trade?.inputAmount.currency.name} for{' '}
+        {trade?.outputAmount.currency.name}
       </h3>
       <h3>{trade && `Constructed Trade: ${displayTrade(trade)}`}</h3>
       <h3>{`Wallet Address: ${getWalletAddress()}`}</h3>
@@ -106,8 +108,8 @@ const Example = () => {
           <button onClick={onConnectWallet}>Connect Wallet</button>
         )}
       <h3>{`Block Number: ${blockNumber + 1}`}</h3>
-      <h3>{`${tokenIn.symbol} Balance: ${tokenInBalance}`}</h3>
-      <h3>{`${tokenOut.symbol} Balance: ${tokenOutBalance}`}</h3>
+      <h3>{`${trade?.inputAmount.currency.name} Balance: ${tokenInBalance}`}</h3>
+      <h3>{`${trade?.inputAmount.currency.name} Balance: ${tokenOutBalance}`}</h3>
       <Button
         onClick={() => wrapETH(1)}
         disabled={getProvider() === null || CurrentConfig.rpc.mainnet === ''}>
