@@ -36,7 +36,7 @@ const getTokens = (): TokensStateT => {
   const tokenIn = r > 50 ? USDC_TOKEN : WETH_TOKEN
   const tokenOut = tokenIn === WETH_TOKEN ? USDC_TOKEN : WETH_TOKEN
   if (tokenIn === WETH_TOKEN) {
-    r1 = r1 / 1000
+    r1 = r1 / 3900
   }
 
   return { tokenIn, tokenOut, amountTokensIn: r1 }
