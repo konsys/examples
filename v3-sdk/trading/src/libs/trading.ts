@@ -56,19 +56,21 @@ export async function createTrade({
 
   const swapRoute = new Route([pool], tokenIn, tokenOut)
 
-  const amountOut = await getOutputQuote(amountTokensIn, swapRoute)
+  const amountOut = await getOutputQuote(
+    { tokenIn, tokenOut, amountTokensIn },
+    swapRoute
+  )
+
+  console.log(111111, tokenIn.symbol)
 
   const uncheckedTrade = Trade.createUncheckedTrade({
     route: swapRoute,
     inputAmount: CurrencyAmount.fromRawAmount(
       tokenIn,
-      fromReadableAmount(
-        amountTokensIn,
-        CurrentConfig.tokens.in.decimals
-      ).toString()
+      fromReadableAmount(amountTokensIn, tokenIn.decimals).toString()
     ),
     outputAmount: CurrencyAmount.fromRawAmount(
-      CurrentConfig.tokens.out,
+      tokenOut,
       JSBI.BigInt(amountOut)
     ),
     tradeType: TradeType.EXACT_INPUT,
@@ -120,7 +122,7 @@ export async function executeTrade(
 // Helper Quoting and Pool Functions
 
 async function getOutputQuote(
-  inputAmount: number,
+  tokensData: TokensStateT,
   route: Route<Currency, Currency>
 ) {
   const provider = getProvider()
@@ -132,10 +134,10 @@ async function getOutputQuote(
   const { calldata } = SwapQuoter.quoteCallParameters(
     route,
     CurrencyAmount.fromRawAmount(
-      CurrentConfig.tokens.in,
+      tokensData.tokenIn,
       fromReadableAmount(
-        inputAmount,
-        CurrentConfig.tokens.in.decimals
+        tokensData.amountTokensIn,
+        tokensData.tokenIn.decimals
       ).toString()
     ),
     TradeType.EXACT_INPUT,

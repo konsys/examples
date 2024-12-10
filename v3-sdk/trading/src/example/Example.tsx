@@ -31,12 +31,15 @@ const useOnBlockUpdated = (callback: (blockNumber: number) => void) => {
 }
 
 const getTokens = (): TokensStateT => {
-  const tokenIn = randomInteger(0, 100) > 50 ? USDC_TOKEN : WETH_TOKEN
+  const r = randomInteger(0, 100)
+  let r1 = randomInteger(1, 10)
+  const tokenIn = r > 50 ? USDC_TOKEN : WETH_TOKEN
   const tokenOut = tokenIn === WETH_TOKEN ? USDC_TOKEN : WETH_TOKEN
-  const amountTokensIn =
-    tokenIn === USDC_TOKEN ? randomInteger(1, 10) : randomInteger(1, 10) / 1000
+  if (tokenIn === USDC_TOKEN) {
+    r1 = r1 / 1000
+  }
 
-  return { tokenIn, tokenOut, amountTokensIn }
+  return { tokenIn, tokenOut, amountTokensIn: r1 }
 }
 
 const Example = () => {
@@ -47,7 +50,6 @@ const Example = () => {
   const [tokenOutBalance, setTokenOutBalance] = useState<string>()
   const [blockNumber, setBlockNumber] = useState<number>(0)
 
-  // Listen for new blocks and update the wallet
   useOnBlockUpdated(async (blockNumber: number) => {
     if (tokensState) {
       refreshBalances(tokensState)
@@ -86,13 +88,12 @@ const Example = () => {
     return false
   }, [refreshBalances])
 
-  const { data, isFetching } = useQuery({
+  useQuery({
     queryKey: ['onTrade'],
     queryFn: onTrade,
     refetchInterval: 2000,
   })
 
-  console.log(234234, data, isFetching)
   return (
     <div className="App">
       {CurrentConfig.rpc.mainnet === '' && (
