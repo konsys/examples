@@ -1,5 +1,6 @@
 import './Example.css'
 
+import { useQuery } from '@tanstack/react-query'
 import { Button } from 'antd'
 import React, { useCallback, useEffect, useState } from 'react'
 
@@ -57,7 +58,6 @@ const Example = () => {
       address,
       CurrentConfig.tokens.out
     )
-    console.log(111, inBalance, outBalance)
     setTokenInBalance(inBalance)
     setTokenOutBalance(outBalance)
   }, [])
@@ -74,7 +74,6 @@ const Example = () => {
   const onCreateTrade = useCallback(async () => {
     await refreshBalances()
     const res = await createTrade(tokensIn)
-    console.log(11111, res)
     setTrade(res)
   }, [refreshBalances, tokensIn])
 
@@ -84,6 +83,13 @@ const Example = () => {
     }
   }, [trade])
 
+  const { data, isLoading } = useQuery({
+    queryKey: ['quote'],
+    queryFn: () => onCreateTrade().then(() => onTrade()),
+    refetchInterval: 2000,
+  })
+
+  console.log(1111, isLoading, data)
   return (
     <div className="App">
       {CurrentConfig.rpc.mainnet === '' && (
