@@ -35,7 +35,7 @@ const getTokens = (): TokensStateT => {
   let r1 = randomInteger(1, 10)
   const tokenIn = r > 50 ? USDC_TOKEN : WETH_TOKEN
   const tokenOut = tokenIn === WETH_TOKEN ? USDC_TOKEN : WETH_TOKEN
-  if (tokenIn === USDC_TOKEN) {
+  if (tokenIn === WETH_TOKEN) {
     r1 = r1 / 1000
   }
 
@@ -111,7 +111,6 @@ const Example = () => {
         {trade?.outputAmount.currency.symbol}
       </h3>
       <h3>{trade && `Constructed Trade: ${displayTrade(trade)}`}</h3>
-      <h3>{`Wallet Address: ${getWalletAddress()}`}</h3>
       {CurrentConfig.env === Environment.WALLET_EXTENSION &&
         !getWalletAddress() && (
           <button onClick={onConnectWallet}>Connect Wallet</button>
