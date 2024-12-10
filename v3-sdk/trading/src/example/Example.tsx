@@ -11,7 +11,12 @@ import {
   getProvider,
   getWalletAddress,
 } from '../libs/providers'
-import { createTrade, executeTrade, TokenTrade } from '../libs/trading'
+import {
+  createTrade,
+  executeTrade,
+  getOutputQuote,
+  TokenTrade,
+} from '../libs/trading'
 import {
   displayTrade,
   getUserBalance,
@@ -42,7 +47,7 @@ const getTokens = (): TokensStateT => {
   return { tokenIn, tokenOut, amountTokensIn: r1 }
 }
 
-const Example = () => {
+const Example = async () => {
   const [tokensState, setTokensState] = useState<TokensStateT>()
   const [trade, setTrade] = useState<TokenTrade>()
 
@@ -95,25 +100,45 @@ const Example = () => {
   })
 
   const showBalance = useCallback(() => {
-    let r = <span />
     if (trade?.inputAmount.currency === USDC_TOKEN) {
-      r = (
+      return (
         <>
           <div>{`${trade?.inputAmount.currency.symbol} Balance: ${tokenInBalance}`}</div>
           <div>{`${trade?.outputAmount.currency.symbol} Balance: ${tokenOutBalance}`}</div>
         </>
       )
     }
-    r = (
+    return (
       <>
         <div>{`${trade?.outputAmount.currency.symbol} Balance: ${tokenOutBalance}`}</div>
         <div>{`${trade?.inputAmount.currency.symbol} Balance: ${tokenInBalance}`}</div>
       </>
     )
-    return r
-  }, [trade, tokenInBalance, tokenOutBalance])
+  }, [
+    tokenInBalance,
+    tokenOutBalance,
+    trade?.inputAmount.currency,
+    trade?.outputAmount.currency.symbol,
+  ])
 
-  console.log(32323)
+  // const q = useCallback(
+  //   async () =>
+  //     await getOutputQuote({
+  //       amountTokensIn: 1,
+  //       tokenIn: USDC_TOKEN,
+  //       tokenOut: WETH_TOKEN,
+  //     }),
+  //   []
+  // )
+  console.log(
+    32323,
+    await getOutputQuote({
+      amountTokensIn: 1,
+      tokenIn: USDC_TOKEN,
+      tokenOut: WETH_TOKEN,
+    })
+  )
+
   return (
     <div className="App">
       {CurrentConfig.rpc.mainnet === '' && (

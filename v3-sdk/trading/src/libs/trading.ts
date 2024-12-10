@@ -41,23 +41,11 @@ export async function createTrade({
   tokenOut,
   amountTokensIn,
 }: TokensStateT): Promise<TokenTrade> {
-  const poolInfo = await getPoolInfo()
-
-  const pool = new Pool(
+  const { amountOut, swapRoute } = await getOutputQuote({
     tokenIn,
     tokenOut,
-    CurrentConfig.tokens.poolFee,
-    poolInfo.sqrtPriceX96.toString(),
-    poolInfo.liquidity.toString(),
-    poolInfo.tick
-  )
-
-  const swapRoute = new Route([pool], tokenIn, tokenOut)
-
-  const amountOut = await getOutputQuote(
-    { tokenIn, tokenOut, amountTokensIn },
-    swapRoute
-  )
+    amountTokensIn,
+  })
 
   const uncheckedTrade = Trade.createUncheckedTrade({
     route: swapRoute,
@@ -117,10 +105,24 @@ export async function executeTrade(
 
 // Helper Quoting and Pool Functions
 
-async function getOutputQuote(
-  tokensData: TokensStateT,
-  route: Route<Currency, Currency>
-) {
+export async function getOutputQuote({
+  tokenIn,
+  tokenOut,
+  amountTokensIn,
+}: TokensStateT) {
+  const poolInfo = await getPoolInfo()
+
+  const pool = new Pool(
+    tokenIn,
+    tokenOut,
+    CurrentConfig.tokens.poolFee,
+    poolInfo.sqrtPriceX96.toString(),
+    poolInfo.liquidity.toString(),
+    poolInfo.tick
+  )
+
+  const swapRoute = new Route([pool], tokenIn, tokenOut)
+
   const provider = getProvider()
 
   if (!provider) {
@@ -128,13 +130,10 @@ async function getOutputQuote(
   }
 
   const { calldata } = SwapQuoter.quoteCallParameters(
-    route,
+    swapRoute,
     CurrencyAmount.fromRawAmount(
-      tokensData.tokenIn,
-      fromReadableAmount(
-        tokensData.amountTokensIn,
-        tokensData.tokenIn.decimals
-      ).toString()
+      tokenIn,
+      fromReadableAmount(amountTokensIn, tokenIn.decimals).toString()
     ),
     TradeType.EXACT_INPUT,
     {
@@ -147,7 +146,13 @@ async function getOutputQuote(
     data: calldata,
   })
 
-  return ethers.utils.defaultAbiCoder.decode(['uint256'], quoteCallReturnData)
+  return {
+    amountOut: ethers.utils.defaultAbiCoder.decode(
+      ['uint256'],
+      quoteCallReturnData
+    ),
+    swapRoute,
+  }
 }
 
 export async function getTokenTransferApproval(
