@@ -11,12 +11,7 @@ import {
   getProvider,
   getWalletAddress,
 } from '../libs/providers'
-import {
-  createTrade,
-  executeTrade,
-  getOutputQuote,
-  TokenTrade,
-} from '../libs/trading'
+import { createTrade, executeTrade, TokenTrade } from '../libs/trading'
 import {
   displayTrade,
   getUserBalance,
@@ -47,7 +42,7 @@ const getTokens = (): TokensStateT => {
   return { tokenIn, tokenOut, amountTokensIn: r1 }
 }
 
-const Example = async () => {
+const Example = () => {
   const [tokensState, setTokensState] = useState<TokensStateT>()
   const [trade, setTrade] = useState<TokenTrade>()
 
@@ -130,14 +125,14 @@ const Example = async () => {
   //     }),
   //   []
   // )
-  console.log(
-    32323,
-    await getOutputQuote({
-      amountTokensIn: 1,
-      tokenIn: USDC_TOKEN,
-      tokenOut: WETH_TOKEN,
-    })
-  )
+  // console.log(
+  //   32323,
+  //   await getOutputQuote({
+  //     amountTokensIn: 1,
+  //     tokenIn: USDC_TOKEN,
+  //     tokenOut: WETH_TOKEN,
+  //   })
+  // )
 
   return (
     <div className="App">
