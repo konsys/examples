@@ -11,7 +11,12 @@ import {
   getProvider,
   getWalletAddress,
 } from '../libs/providers'
-import { createTrade, executeTrade, TokenTrade } from '../libs/trading'
+import {
+  createTrade,
+  executeTrade,
+  getOutputQuote,
+  TokenTrade,
+} from '../libs/trading'
 import {
   displayTrade,
   getUserBalance,
@@ -116,23 +121,22 @@ const Example = () => {
     trade?.outputAmount.currency.symbol,
   ])
 
-  // const q = useCallback(
-  //   async () =>
-  //     await getOutputQuote({
-  //       amountTokensIn: 1,
-  //       tokenIn: USDC_TOKEN,
-  //       tokenOut: WETH_TOKEN,
-  //     }),
-  //   []
-  // )
-  // console.log(
-  //   32323,
-  //   await getOutputQuote({
-  //     amountTokensIn: 1,
-  //     tokenIn: USDC_TOKEN,
-  //     tokenOut: WETH_TOKEN,
-  //   })
-  // )
+  const q = useCallback(
+    async () =>
+      await getOutputQuote({
+        amountTokensIn: 1,
+        tokenIn: USDC_TOKEN,
+        tokenOut: WETH_TOKEN,
+      }),
+    []
+  )
+
+  const { data } = useQuery({
+    queryKey: ['onTrade1'],
+    queryFn: q,
+    refetchInterval: 2000,
+  })
+  console.log(32323, data?.amountOut?.toString())
 
   return (
     <div className="App">
