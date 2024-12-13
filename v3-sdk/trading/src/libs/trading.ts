@@ -11,7 +11,7 @@ import { ethers, Wallet } from 'ethers'
 import { Result } from 'ethers/lib/utils'
 import JSBI from 'jsbi'
 
-import { TokensStateT, TransactionState } from '../types'
+import { AddressT, TokensStateT, TradeStateT, TransactionState } from '../types'
 import {
   ERC20_ABI,
   feeAmount,
@@ -25,27 +25,23 @@ import { fromReadableAmount } from './utils'
 
 export type TokenTrade = Trade<Token, Token, TradeType>
 
-export async function createTrade({
-  tokenIn,
-  tokenOut,
-  amountTokensIn,
-  wallet,
-}: TokensStateT): Promise<TokenTrade> {
-  const { amountOut, swapRoute } = await getOutputQuote({
-    tokenIn,
-    tokenOut,
-    amountTokensIn,
-    wallet,
-  })
+export async function createTrade(
+  tokensState: TokensStateT,
+  wallet: Wallet
+): Promise<TokenTrade> {
+  const { amountOut, swapRoute } = await getOutputQuote(tokensState, wallet)
 
   const uncheckedTrade = Trade.createUncheckedTrade({
     route: swapRoute,
     inputAmount: CurrencyAmount.fromRawAmount(
-      tokenIn,
-      fromReadableAmount(amountTokensIn, tokenIn.decimals).toString()
+      tokensState.tokenIn,
+      fromReadableAmount(
+        tokensState.amountTokensIn,
+        tokensState.tokenIn.decimals
+      ).toString()
     ),
     outputAmount: CurrencyAmount.fromRawAmount(
-      tokenOut,
+      tokensState.tokenOut,
       JSBI.BigInt(amountOut)
     ),
     tradeType: TradeType.EXACT_INPUT,
@@ -54,22 +50,24 @@ export async function createTrade({
 }
 
 export async function executeTrade(
-  trade: TokenTrade,
-  tokensData: TokensStateT,
-  address: string,
-  wallet: Wallet
-): Promise<TransactionState> {
-  const provider = getProvider(wallet)
+  trade: TradeStateT
+): Promise<TransactionState | undefined> {
+  if (!trade.wallet || !trade.trade) {
+    console.error('No data in executeTrade')
+    throw new Error('no wallet')
+  }
+
+  const provider = getProvider(trade.wallet)
 
   if (!provider) {
+    console.error('No provider in executeTrade')
     throw new Error('Cannot execute a trade without a provider')
   }
 
   // Give approval to the router to spend the token
   const tokenApproval = await getTokenTransferApproval(
-    tokensData,
-    address,
-    wallet
+    trade,
+    trade.tokensState.tokenIn.address
   )
 
   // Fail if transfer approvals do not go through
@@ -80,65 +78,73 @@ export async function executeTrade(
   const options: SwapOptions = {
     slippageTolerance: new Percent(50, 10_000), // 50 bips, or 0.50%
     deadline: Math.floor(Date.now() / 1000) + 60 * 20, // 20 minutes from the current Unix time
-    recipient: address,
+    recipient: trade.wallet.address,
   }
 
-  const methodParameters = SwapRouter.swapCallParameters([trade], options)
+  const methodParameters = SwapRouter.swapCallParameters([trade.trade], options)
 
-  const tx = {
+  const tx: ethers.providers.TransactionRequest = {
     data: methodParameters.calldata,
     to: SWAP_ROUTER_ADDRESS,
     value: methodParameters.value,
-    from: address,
+    from: trade.wallet.address,
     maxFeePerGas: MAX_FEE_PER_GAS,
     maxPriorityFeePerGas: MAX_PRIORITY_FEE_PER_GAS,
   }
 
-  const res = await sendTransaction(tx, wallet)
+  try {
+    const res = await sendTransaction(tx, trade.wallet)
 
-  return res
+    return res
+  } catch (e) {
+    // console.error('Transaction error', e)
+    // throw new Error('Transaction error')
+    // NOP
+  }
 }
 
 // Helper Quoting and Pool Functions
 
-export async function getOutputQuote({
-  tokenIn,
-  tokenOut,
-  amountTokensIn,
-  wallet,
-}: TokensStateT): Promise<{
+export async function getOutputQuote(
+  tokensState: TokensStateT,
+  wallet: Wallet
+): Promise<{
   amountOut: Result
   swapRoute: Route<Token, Token>
 }> {
-  const poolInfo = await getPoolInfo({
-    tokenIn,
-    tokenOut,
-    amountTokensIn,
-    wallet,
-  })
+  if (!wallet) {
+    console.error('No wallet in getOutputQuote')
+    throw new Error('no wallet')
+  }
+
+  const poolInfo = await getPoolInfo(tokensState, wallet)
 
   const pool = new Pool(
-    tokenIn,
-    tokenOut,
+    tokensState.tokenIn,
+    tokensState.tokenOut,
     feeAmount,
     poolInfo.sqrtPriceX96.toString(),
     poolInfo.liquidity.toString(),
     poolInfo.tick
   )
 
-  const swapRoute = new Route([pool], tokenIn, tokenOut)
+  const swapRoute = new Route([pool], tokensState.tokenIn, tokensState.tokenOut)
 
   const provider = getProvider(wallet)
 
   if (!provider) {
+    console.error('No provider in getOutputQuote')
     throw new Error('Provider required to get pool state')
   }
 
   const { calldata } = SwapQuoter.quoteCallParameters(
     swapRoute,
     CurrencyAmount.fromRawAmount(
-      tokenIn,
-      fromReadableAmount(amountTokensIn, tokenIn.decimals).toString()
+      tokensState.tokenIn,
+      fromReadableAmount(
+        tokensState.amountTokensIn,
+        tokensState.tokenIn.decimals
+      ).toString()
     ),
     TradeType.EXACT_INPUT,
     {
@@ -161,35 +167,35 @@ export async function getOutputQuote({
 }
 
 export async function getTokenTransferApproval(
-  tokensData: TokensStateT,
-  address: string,
-  wallet: Wallet
+  { tokensState, wallet }: TradeStateT,
+  tokenAddress: AddressT
 ): Promise<TransactionState> {
+  if (!wallet) {
+    console.error('No wallet in getTokenTransferApproval')
+    throw new Error('No wallet')
+  }
   const provider = getProvider(wallet)
   if (!provider) {
-    console.log('No Provider Found')
+    console.error('No Provider or address in getTokenTransferApproval')
     return TransactionState.Failed
   }
 
   try {
-    const tokenContract = new ethers.Contract(
-      tokensData.tokenIn.address,
-      ERC20_ABI,
-      provider
-    )
+    const tokenContract = new ethers.Contract(tokenAddress, ERC20_ABI, provider)
 
     const transaction = await tokenContract.populateTransaction.approve(
       SWAP_ROUTER_ADDRESS,
       fromReadableAmount(
-        tokensData.amountTokensIn,
-        tokensData.tokenIn.decimals
+        tokensState.amountTokensIn,
+        tokensState.tokenIn.decimals
       ).toString()
     )
 
+    console.log(111, transaction)
     return sendTransaction(
       {
         ...transaction,
-        from: address,
+        from: wallet.address,
       },
       wallet
     )

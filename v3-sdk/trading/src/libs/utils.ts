@@ -2,7 +2,7 @@ import { Token, TradeType } from '@uniswap/sdk-core'
 import { Trade } from '@uniswap/v3-sdk'
 import { BigNumber, ethers, Wallet } from 'ethers'
 
-import { AddressT, TokenBalanceT, TokensStateT } from '../types'
+import { TokenBalanceT, TokensStateT } from '../types'
 import { USDC_TOKEN, WETH_TOKEN } from './constants'
 import { getProvider } from './providers'
 import { getCurrencyBalance } from './wallet'
@@ -34,17 +34,17 @@ export function randomInteger(min: number, max: number) {
 }
 
 export const getUserBalance = async (
-  address: AddressT,
   tokens: Token[],
   wallet: Wallet
 ): Promise<TokenBalanceT> => {
   const provider = getProvider(wallet)
 
   if (!provider) {
+    console.error('No provider in getUserBalance')
     throw new Error('No provider')
   }
   const fns = await Promise.all(
-    tokens.map((token) => getCurrencyBalance(provider, address, token))
+    tokens.map((token) => getCurrencyBalance(provider, wallet.address, token))
   )
   const r: TokenBalanceT = {}
   fns.forEach((v, i) => {
@@ -60,10 +60,7 @@ export function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms))
 }
 
-export const getRandomTokens = (
-  wallet: Wallet,
-  ethPrice = 3000
-): TokensStateT => {
+export const getRandomTokens1 = (ethPrice = 3000): TokensStateT => {
   const r = randomInteger(0, 100)
   let r1 = randomInteger(1, 1000)
   const tokenIn = r > 50 ? USDC_TOKEN : WETH_TOKEN
@@ -72,5 +69,21 @@ export const getRandomTokens = (
     r1 = r1 / ethPrice
   }
 
-  return { tokenIn, tokenOut, amountTokensIn: r1, wallet }
+  return { tokenIn, tokenOut, amountTokensIn: r1 }
+}
+
+export const getRandomTokens = (ethPrice = 3000): TokensStateT => {
+  const r = randomInteger(0, 100)
+  let _r1 = randomInteger(1, 1000)
+  const tokenIn = r > 50 ? USDC_TOKEN : WETH_TOKEN
+  const _tokenOut = tokenIn === WETH_TOKEN ? USDC_TOKEN : WETH_TOKEN
+  if (tokenIn === WETH_TOKEN) {
+    _r1 = _r1 / ethPrice
+  }
+
+  return {
+    tokenIn: USDC_TOKEN,
+    tokenOut: WETH_TOKEN,
+    amountTokensIn: 1,
+  }
 }

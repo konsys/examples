@@ -9,7 +9,6 @@ const mainnetProvider = new ethers.providers.JsonRpcProvider(
   CurrentConfig.rpc.mainnet
 )
 
-const browserExtensionProvider = createBrowserExtensionProvider()
 let walletExtensionAddress: string | null = null
 
 export function getMainnetProvider(): BaseProvider {
@@ -24,14 +23,13 @@ export async function sendTransaction(
   transaction: ethers.providers.TransactionRequest,
   wallet: Wallet
 ): Promise<TransactionState> {
-  if (CurrentConfig.env === Environment.WALLET_EXTENSION) {
-    return sendTransactionViaExtension(transaction)
-  } else {
-    if (transaction.value) {
-      transaction.value = BigNumber.from(transaction.value)
-    }
-    return sendTransactionViaWallet(transaction, wallet)
+  if (transaction.value) {
+    transaction.value = BigNumber.from(transaction.value)
   }
+
+  const res = await sendTransactionViaWallet(transaction, wallet)
+
+  return res
 }
 
 export async function connectBrowserExtensionWallet() {
@@ -61,34 +59,6 @@ export function createWallet(privateKey: string): ethers.Wallet {
   return new ethers.Wallet(privateKey, provider)
 }
 
-function createBrowserExtensionProvider(): ethers.providers.Web3Provider | null {
-  try {
-    return new ethers.providers.Web3Provider(window?.ethereum, 'any')
-  } catch (e) {
-    console.log('No Wallet Extension Found')
-    return null
-  }
-}
-
-async function sendTransactionViaExtension(
-  transaction: ethers.providers.TransactionRequest
-): Promise<TransactionState> {
-  try {
-    const receipt = await browserExtensionProvider?.send(
-      'eth_sendTransaction',
-      [transaction]
-    )
-    if (receipt) {
-      return TransactionState.Sent
-    } else {
-      return TransactionState.Failed
-    }
-  } catch (e) {
-    console.log(e)
-    return TransactionState.Rejected
-  }
-}
-
 async function sendTransactionViaWallet(
   transaction: ethers.providers.TransactionRequest,
   wallet: Wallet
@@ -96,6 +66,8 @@ async function sendTransactionViaWallet(
   if (transaction.value) {
     transaction.value = BigNumber.from(transaction.value)
   }
+
+  console.log(transaction)
   const txRes = await wallet.sendTransaction(transaction)
 
   let receipt = null

@@ -1,22 +1,23 @@
 import { Token } from '@uniswap/sdk-core'
 import { Wallet } from 'ethers'
 
+import { TokenTrade } from './libs/trading'
+
 export type TokensStateT = {
   tokenIn: Token
   tokenOut: Token
   amountTokensIn: number
-  wallet: Wallet
 }
 
 export type TokensAvailableT = Record<TokenName, Token>
 
 export type TokenName = 'WETH' | 'USDC' | 'USDT'
 
-export type AddressT = 'string'
-export type PrivateKeyT = 'string'
+export type AddressT = string
+export type PrivateKeyT = string
 
-export type TokenBalanceT = Record<string, number>
-export type UserBalanceT = Record<string, TokenBalanceT>
+export type TokenBalanceT = Record<AddressT, number>
+export type UserBalanceT = Record<AddressT, TokenBalanceT>
 
 export enum TransactionState {
   Failed = 'Failed',
@@ -24,4 +25,10 @@ export enum TransactionState {
   Rejected = 'Rejected',
   Sending = 'Sending',
   Sent = 'Sent',
+}
+
+export type TradeStateT = {
+  trade: TokenTrade
+  wallet: Wallet
+  tokensState: TokensStateT
 }

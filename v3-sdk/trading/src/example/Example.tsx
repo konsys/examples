@@ -1,13 +1,13 @@
-import './Example.css'
+import './style.css'
 
 import { useQuery } from '@tanstack/react-query'
+import { Button } from 'antd'
 import { Wallet } from 'ethers'
 import React, { useCallback, useEffect, useState } from 'react'
 
 import { CurrentConfig, Environment } from '../config'
 import { useOnBlockUpdated } from '../hooks/useOnBlockUpdated'
 import {
-  AliceAddress,
   AliceWallet,
   BobAddress,
   BobWallet,
@@ -16,24 +16,17 @@ import {
   WETH_TOKEN,
 } from '../libs/constants'
 import { getProvider } from '../libs/providers'
-import {
-  createTrade,
-  executeTrade,
-  getOutputQuote,
-  TokenTrade,
-} from '../libs/trading'
+import { createTrade, executeTrade, getOutputQuote } from '../libs/trading'
 import { displayTrade, getRandomTokens, getUserBalance } from '../libs/utils'
-import { TokensStateT, UserBalanceT } from '../types'
+import { AddressT, TokensStateT, TradeStateT, UserBalanceT } from '../types'
 
 const Example = () => {
-  const [trade, setTrade] = useState<{
-    trade: TokenTrade
-    wallet: Wallet
-    address: string
-  }>()
-  const [tokensState, setTokensState] = useState<TokensStateT>()
+  const [tradeList, setTradeList] = useState<Record<AddressT, TradeStateT>>()
   const [tokenBalance, setTokenBalance] = useState<UserBalanceT>()
   const [blockNumber, setBlockNumber] = useState<number>(0)
+  const BobTrade = tradeList ? tradeList[BobAddress] : null
+
+  // const AliceTrade = trade ? trade[AliceAddress] : null
 
   useOnBlockUpdated(async (blockNumber: number) => {
     refreshBalances()
@@ -43,8 +36,9 @@ const Example = () => {
   // Update wallet state given a block number
   const refreshBalances = useCallback(async () => {
     const tokens = [USDC_TOKEN, WETH_TOKEN]
-    const ALICE = await getUserBalance(AliceAddress, tokens, AliceWallet)
-    const BOB = await getUserBalance(BobAddress, tokens, BobWallet)
+    const ALICE = await getUserBalance(tokens, AliceWallet)
+    const BOB = await getUserBalance(tokens, BobWallet)
+
     setTokenBalance({
       ALICE,
       BOB,
@@ -52,35 +46,32 @@ const Example = () => {
   }, [])
 
   const showBalance = useCallback(() => {
-    return (
+    return tokenBalance ? (
       <>
-        <div>{`Balance ALICE USDC: ${
-          tokenBalance && tokenBalance['ALICE'].USDC
-        }`}</div>
-        <div>{`Balance ALICE WETH: ${
-          tokenBalance && tokenBalance['ALICE'].WETH
-        }`}</div>
+        <div>{`Balance ALICE USDC: ${tokenBalance['ALICE'].USDC}`}</div>
+        <div>{`Balance ALICE WETH: ${tokenBalance['ALICE'].WETH}`}</div>
         <br />
-        <div>{`Balance BOB USDC: ${
-          tokenBalance && tokenBalance['BOB'].USDC
-        }`}</div>
-        <div>{`Balance BOB WETH: ${
-          tokenBalance && tokenBalance['BOB'].WETH
-        }`}</div>
+        <div>{`Balance BOB USDC: ${tokenBalance['BOB'].USDC}`}</div>
+        <div>{`Balance BOB WETH: ${tokenBalance['BOB'].WETH}`}</div>
       </>
+    ) : (
+      <span />
     )
   }, [tokenBalance])
 
-  const getQuote = useCallback(
-    async () =>
-      await getOutputQuote({
-        amountTokensIn: 1,
-        tokenIn: USDC_TOKEN,
-        tokenOut: WETH_TOKEN,
-        wallet: BobWallet,
-      }),
-    []
-  )
+  const getQuote = useCallback(async () => {
+    if (BobTrade?.trade) {
+      return await getOutputQuote(
+        {
+          amountTokensIn: 1,
+          tokenIn: USDC_TOKEN,
+          tokenOut: WETH_TOKEN,
+        },
+        BobWallet
+      )
+    }
+    return { amountOut: 0 }
+  }, [BobTrade?.trade])
 
   const { data } = useQuery({
     queryKey: [blockNumber],
@@ -91,36 +82,38 @@ const Example = () => {
     : 0
 
   const prepareTrade = useCallback(
-    async (wallet: Wallet, address: string, tokensState: TokensStateT) => {
+    async (wallet: Wallet, tokensState: TokensStateT) => {
       await refreshBalances()
 
-      setTokensState(tokensState)
-      const trade = await createTrade(tokensState)
-      setTrade({ trade, wallet, address })
+      const trade = await createTrade(tokensState, wallet)
+      setTradeList({
+        [wallet.address]: {
+          trade,
+          wallet,
+          tokensState,
+        },
+      })
       return true
     },
     [refreshBalances]
   )
 
-  const makeTrade = useCallback(
-    async (trade: TokenTrade, tokensData: TokensStateT, address: string) => {
-      await executeTrade(trade, tokensData, address, BobWallet)
-    },
-    []
-  )
+  const makeTrade = useCallback(async (trade: TradeStateT) => {
+    await executeTrade(trade)
+  }, [])
 
   useEffect(() => {
-    if (trade && tokensState) {
-      makeTrade(trade.trade, tokensState, trade.address)
+    if (BobTrade) {
+      makeTrade(BobTrade)
     }
-  }, [trade, tokensState, makeTrade])
+  }, [BobTrade, makeTrade])
 
-  useQuery({
-    queryKey: ['prepareTrade'],
-    queryFn: () =>
-      prepareTrade(BobWallet, BobAddress, getRandomTokens(BobWallet, ethPrice)),
-    refetchInterval: TRADE_INTERVAL,
-  })
+  // useQuery({
+  //   queryKey: ['prepareBobTrade', BobTrade?.wallet?.address],
+  //   queryFn: () => prepareTrade(BobWallet, getRandomTokens(ethPrice)),
+  //   refetchInterval: TRADE_INTERVAL,
+  // })
+
   return (
     <div className="App">
       {CurrentConfig.rpc.mainnet === '' && (
@@ -133,13 +126,19 @@ const Example = () => {
           </h2>
         )}
 
-      <h3>{trade?.trade && ` ${displayTrade(trade.trade)}`}</h3>
+      <h3>{BobTrade?.trade && ` ${displayTrade(BobTrade.trade)}`}</h3>
 
       <h3>{`Block Number: ${blockNumber + 1}`}</h3>
       {showBalance()}
 
       <br />
       <div>{`1 ETH =  ${ethPrice}`}</div>
+      <Button
+        onClick={() =>
+          prepareTrade(BobWallet, getRandomTokens(ethPrice || undefined))
+        }>
+        Trade
+      </Button>
     </div>
   )
 }

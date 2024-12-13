@@ -42,6 +42,7 @@ export async function getCurrencyBalance(
 export async function wrapETH(eth: number, address: string, wallet: Wallet) {
   const provider = getProvider(wallet)
   if (!provider || !address) {
+    console.error('No provider or address in wrapETH')
     throw new Error('Cannot wrap ETH without a provider and wallet address')
   }
 
@@ -69,6 +70,7 @@ export async function wrapETH(eth: number, address: string, wallet: Wallet) {
 export async function unwrapETH(eth: number, address: string, wallet: Wallet) {
   const provider = getProvider(wallet)
   if (!provider || !address) {
+    console.error('No provider or address in unwrapETH')
     throw new Error('Cannot unwrap ETH without a provider and wallet address')
   }
 

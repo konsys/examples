@@ -1,6 +1,6 @@
 import IUniswapV3PoolABI from '@uniswap/v3-core/artifacts/contracts/interfaces/IUniswapV3Pool.sol/IUniswapV3Pool.json'
 import { computePoolAddress } from '@uniswap/v3-sdk'
-import { ethers } from 'ethers'
+import { ethers, Wallet } from 'ethers'
 
 import { TokensStateT } from '../types'
 import { feeAmount, POOL_FACTORY_CONTRACT_ADDRESS } from './constants'
@@ -16,20 +16,26 @@ interface PoolInfo {
   tick: number
 }
 
-export async function getPoolInfo({
-  tokenIn,
-  tokenOut,
-  wallet,
-}: TokensStateT): Promise<PoolInfo> {
+export async function getPoolInfo(
+  tokensState: TokensStateT,
+  wallet: Wallet
+): Promise<PoolInfo> {
+  if (!wallet) {
+    console.error('No wallet in getPoolInfo')
+    throw new Error('Cannot execute a trade without a provider')
+  }
+
   const provider = getProvider(wallet)
+
   if (!provider) {
+    console.error('No provider in getPoolInfo')
     throw new Error('No provider')
   }
 
   const currentPoolAddress = computePoolAddress({
     factoryAddress: POOL_FACTORY_CONTRACT_ADDRESS,
-    tokenA: tokenIn,
-    tokenB: tokenOut,
+    tokenA: tokensState.tokenIn,
+    tokenB: tokensState.tokenOut,
     fee: feeAmount,
   })
 
