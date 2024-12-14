@@ -10,9 +10,10 @@ import { useOnBlockUpdated } from '../hooks/useOnBlockUpdated'
 import {
   AliceAddress,
   AliceWallet,
-  amountUSDCToSell,
+  AMOUNR_USDC_TO_SELL,
   BobAddress,
   BobWallet,
+  PERCENT_TO_WON,
   TRADE_INTERVAL,
   USDC_TOKEN,
   WETH_TOKEN,
@@ -148,7 +149,7 @@ const Example = () => {
   const alicePrepare = useCallback(async () => {
     const { amountOut } = await getQuote(
       {
-        amountTokensIn: amountUSDCToSell,
+        amountTokensIn: AMOUNR_USDC_TO_SELL,
         tokenIn: USDC_TOKEN,
         tokenOut: WETH_TOKEN,
       },
@@ -164,11 +165,11 @@ const Example = () => {
 
     if (!aliceWethBalance) {
       await prepareTrade(AliceWallet, {
-        amountTokensIn: amountUSDCToSell,
+        amountTokensIn: AMOUNR_USDC_TO_SELL,
         tokenOut: WETH_TOKEN,
         tokenIn: USDC_TOKEN,
       })
-    } else if (aliceWethBalance > 0 && percentGr > 1) {
+    } else if (percentGr > PERCENT_TO_WON) {
       await prepareTrade(AliceWallet, {
         amountTokensIn: aliceWethBalance,
         tokenOut: USDC_TOKEN,

@@ -66,7 +66,7 @@ export const getRandomTokens = (
 ): TokensStateT => {
   const r = randomInteger(0, 100)
   let _r1 = randomInteger(1, 1000)
-  const tokenIn = r > 0 ? USDC_TOKEN : WETH_TOKEN
+  const tokenIn = r > 50 ? USDC_TOKEN : WETH_TOKEN
   const _tokenOut = tokenIn === WETH_TOKEN ? USDC_TOKEN : WETH_TOKEN
   if (tokenIn === WETH_TOKEN) {
     _r1 = _r1 / ethPrice
