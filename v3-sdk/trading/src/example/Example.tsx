@@ -10,6 +10,7 @@ import { useOnBlockUpdated } from '../hooks/useOnBlockUpdated'
 import {
   AliceAddress,
   AliceWallet,
+  amountUSDCToSell,
   BobAddress,
   BobWallet,
   TRADE_INTERVAL,
@@ -110,17 +111,13 @@ const Example = () => {
 
   useEffect(() => {
     if (AliceTrade) {
-      makeTrade(AliceTrade).then(() => {
-        console.log('AliceTrade Completed')
-      })
+      makeTrade(AliceTrade).then()
     }
   }, [AliceTrade, makeTrade])
 
   useEffect(() => {
     if (BobTrade) {
-      makeTrade(BobTrade).then(() => {
-        console.log('BobTrade Completed')
-      })
+      makeTrade(BobTrade).then()
     }
   }, [BobTrade, makeTrade])
 
@@ -148,11 +145,9 @@ const Example = () => {
   const usdcPrice = aliceData ? +aliceData.amountOut.toString() / 10e17 : 0
 
   const alicePrepare = useCallback(async () => {
-    const amountToBuy = 1
-
     const { amountOut } = await getQuote(
       {
-        amountTokensIn: amountToBuy,
+        amountTokensIn: amountUSDCToSell,
         tokenIn: USDC_TOKEN,
         tokenOut: WETH_TOKEN,
       },
@@ -168,7 +163,7 @@ const Example = () => {
 
     if (!aliceWethBalance) {
       await prepareTrade(AliceWallet, {
-        amountTokensIn: amountToBuy,
+        amountTokensIn: amountUSDCToSell,
         tokenOut: WETH_TOKEN,
         tokenIn: USDC_TOKEN,
       })
