@@ -24,6 +24,7 @@ import { AddressT, TokensStateT, TradeStateT, UserBalanceT } from '../types'
 const Example = () => {
   const [tradeList, setTradeList] = useState<Record<AddressT, TradeStateT>>()
   const [tokenBalance, setTokenBalance] = useState<UserBalanceT>()
+  const [aliceUsdc, setAliceUsdc] = useState<number>(0)
   const [blockNumber, setBlockNumber] = useState<number>(0)
   const BobTrade = tradeList ? tradeList[BobAddress] : null
 
@@ -129,9 +130,25 @@ const Example = () => {
     refetchInterval: TRADE_INTERVAL,
   })
 
+  const aliceWethBalance = tokenBalance ? tokenBalance['ALICE'].WETH : 0
+
+  const { data: aliceData } = useQuery({
+    queryKey: [blockNumber],
+    queryFn: () =>
+      getQuote(
+        {
+          amountTokensIn: aliceWethBalance,
+          tokenIn: USDC_TOKEN,
+          tokenOut: WETH_TOKEN,
+        },
+        AliceWallet
+      ),
+  })
+
+  const usdcPrice = aliceData ? +aliceData.amountOut.toString() / 10e17 : 0
+
   const alicePrepare = useCallback(async () => {
     const amountToBuy = 1
-    const aliceWethBalance = tokenBalance ? tokenBalance['ALICE'].WETH : 0
 
     const { amountOut } = await getQuote(
       {
@@ -145,25 +162,25 @@ const Example = () => {
 
     const percentGr = ((aliceWethBalance - usdcPrice) / aliceWethBalance) * 100
 
-    console.log(111, 'aliceWethBalance', aliceWethBalance)
-    console.log(222, 'usdcPrice', usdcPrice)
-    console.log(333, 'percentGr', percentGr)
+    if (aliceWethBalance === 0) {
+      setAliceUsdc(tokenBalance ? tokenBalance['ALICE'].USDC : 0)
+    }
+
     if (!aliceWethBalance) {
-      console.log(444, '!aliceWethBalance')
       await prepareTrade(AliceWallet, {
         amountTokensIn: amountToBuy,
         tokenOut: WETH_TOKEN,
         tokenIn: USDC_TOKEN,
       })
     } else if (aliceWethBalance > 0 && percentGr > 1) {
-      console.log(555, 'aliceWethBalance > 0', aliceWethBalance)
       await prepareTrade(AliceWallet, {
         amountTokensIn: aliceWethBalance,
         tokenOut: USDC_TOKEN,
         tokenIn: WETH_TOKEN,
       })
     }
-  }, [prepareTrade, getQuote, tokenBalance])
+    return true
+  }, [prepareTrade, getQuote, aliceWethBalance, tokenBalance])
 
   useQuery({
     queryKey: ['alicePrepare'],
@@ -185,8 +202,15 @@ const Example = () => {
 
       <h3>{BobTrade?.trade && ` ${displayTrade(BobTrade.trade)}`}</h3>
 
-      <h3>{`Block Number: ${blockNumber + 1}`}</h3>
+      <div>{`Block Number: ${blockNumber + 1}`}</div>
       {showBalance()}
+
+      <br />
+      <div>{`Alice has WETH: ${aliceWethBalance}`}</div>
+      <br />
+      <div>{`Alice won Usdc: ${aliceUsdc}`}</div>
+      <br />
+      <div>{`WETH price: ${usdcPrice}`}</div>
 
       <br />
       <div>{`1 ETH =  ${ethPrice}`}</div>
