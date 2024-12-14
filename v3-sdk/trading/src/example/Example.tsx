@@ -180,7 +180,7 @@ const Example = () => {
   useQuery({
     queryKey: ['alicePrepare'],
     queryFn: () => alicePrepare(),
-    refetchInterval: TRADE_INTERVAL + 3000,
+    refetchInterval: TRADE_INTERVAL,
   })
 
   return (
