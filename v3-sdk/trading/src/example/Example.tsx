@@ -8,6 +8,7 @@ import React, { useCallback, useEffect, useState } from 'react'
 import { CurrentConfig, Environment } from '../config'
 import { useOnBlockUpdated } from '../hooks/useOnBlockUpdated'
 import {
+  AliceAddress,
   AliceWallet,
   BobAddress,
   BobWallet,
@@ -26,7 +27,7 @@ const Example = () => {
   const [blockNumber, setBlockNumber] = useState<number>(0)
   const BobTrade = tradeList ? tradeList[BobAddress] : null
 
-  // const AliceTrade = trade ? trade[AliceAddress] : null
+  const AliceTrade = tradeList ? tradeList[AliceAddress] : null
 
   useOnBlockUpdated(async (blockNumber: number) => {
     refreshBalances()
@@ -59,60 +60,116 @@ const Example = () => {
     )
   }, [tokenBalance])
 
-  const getQuote = useCallback(async () => {
-    if (BobTrade?.trade) {
-      return await getOutputQuote(
-        {
-          amountTokensIn: 1,
-          tokenIn: USDC_TOKEN,
-          tokenOut: WETH_TOKEN,
-        },
-        BobWallet
-      )
-    }
-    return { amountOut: 0 }
-  }, [BobTrade?.trade])
+  const getQuote = useCallback(
+    async (tokens: TokensStateT, wallet: Wallet) => {
+      if (BobTrade?.trade) {
+        return await getOutputQuote(tokens, wallet)
+      }
+      return { amountOut: 0 }
+    },
+    [BobTrade?.trade]
+  )
 
   const { data } = useQuery({
     queryKey: [blockNumber],
-    queryFn: getQuote,
+    queryFn: () =>
+      getQuote(
+        { amountTokensIn: 1, tokenIn: WETH_TOKEN, tokenOut: USDC_TOKEN },
+        BobWallet
+      ),
   })
+
   const ethPrice = data?.amountOut
-    ? +data?.amountOut.toString() / 100000000000
-    : 0
+    ? +data?.amountOut.toString() / 1000000
+    : 3000
+
+  const makeTrade = useCallback(async (trade: TradeStateT) => {
+    await executeTrade(trade)
+  }, [])
 
   const prepareTrade = useCallback(
     async (wallet: Wallet, tokensState: TokensStateT) => {
       await refreshBalances()
 
       const trade = await createTrade(tokensState, wallet)
+
       setTradeList({
+        ...tradeList,
         [wallet.address]: {
           trade,
           wallet,
           tokensState,
         },
       })
+
       return true
     },
-    [refreshBalances]
+    [refreshBalances, tradeList]
   )
 
-  const makeTrade = useCallback(async (trade: TradeStateT) => {
-    await executeTrade(trade)
-  }, [])
+  useEffect(() => {
+    if (AliceTrade) {
+      makeTrade(AliceTrade).then(() => {
+        console.log('AliceTrade Completed')
+      })
+    }
+  }, [AliceTrade, makeTrade])
 
   useEffect(() => {
     if (BobTrade) {
-      makeTrade(BobTrade)
+      makeTrade(BobTrade).then(() => {
+        console.log('BobTrade Completed')
+      })
     }
   }, [BobTrade, makeTrade])
 
-  // useQuery({
-  //   queryKey: ['prepareBobTrade', BobTrade?.wallet?.address],
-  //   queryFn: () => prepareTrade(BobWallet, getRandomTokens(ethPrice)),
-  //   refetchInterval: TRADE_INTERVAL,
-  // })
+  useQuery({
+    queryKey: ['prepareBobTrade'],
+    queryFn: () => prepareTrade(BobWallet, getRandomTokens(ethPrice || 1000)),
+    refetchInterval: TRADE_INTERVAL,
+  })
+
+  const alicePrepare = useCallback(async () => {
+    const amountToBuy = 1
+    const aliceWethBalance = tokenBalance ? tokenBalance['ALICE'].WETH : 0
+
+    const { amountOut } = await getQuote(
+      {
+        amountTokensIn: amountToBuy,
+        tokenIn: USDC_TOKEN,
+        tokenOut: WETH_TOKEN,
+      },
+      AliceWallet
+    )
+    const usdcPrice = +amountOut.toString() / 10e17
+
+    const percentGr = ((aliceWethBalance - usdcPrice) / aliceWethBalance) * 100
+
+    console.log(111, 'aliceWethBalance', aliceWethBalance)
+    console.log(222, 'usdcPrice', usdcPrice)
+    console.log(333, 'percentGr', percentGr)
+    if (!aliceWethBalance) {
+      console.log(444, '!aliceWethBalance')
+      await prepareTrade(AliceWallet, {
+        amountTokensIn: amountToBuy,
+        tokenOut: WETH_TOKEN,
+        tokenIn: USDC_TOKEN,
+      })
+    } else if (aliceWethBalance > 0 && percentGr > 1) {
+      console.log(555, 'aliceWethBalance > 0', aliceWethBalance)
+      await prepareTrade(AliceWallet, {
+        amountTokensIn: aliceWethBalance,
+        tokenOut: USDC_TOKEN,
+        tokenIn: WETH_TOKEN,
+      })
+    }
+  }, [prepareTrade, getQuote, tokenBalance])
+
+  useQuery({
+    queryKey: ['alicePrepare'],
+    queryFn: () => alicePrepare(),
+    refetchInterval: TRADE_INTERVAL + 3000,
+  })
 
   return (
     <div className="App">
@@ -133,12 +190,15 @@ const Example = () => {
 
       <br />
       <div>{`1 ETH =  ${ethPrice}`}</div>
+      <br />
       <Button
         onClick={() =>
-          prepareTrade(BobWallet, getRandomTokens(ethPrice || undefined))
+          prepareTrade(BobWallet, getRandomTokens(ethPrice || 3000))
         }>
-        Trade
+        Trade BOB
       </Button>
+      <br />
+      <Button onClick={alicePrepare}>Trade ALICE</Button>
     </div>
   )
 }

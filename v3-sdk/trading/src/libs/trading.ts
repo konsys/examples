@@ -191,7 +191,6 @@ export async function getTokenTransferApproval(
       ).toString()
     )
 
-    console.log(111, transaction)
     return sendTransaction(
       {
         ...transaction,

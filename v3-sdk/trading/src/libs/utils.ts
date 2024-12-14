@@ -60,30 +60,27 @@ export function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms))
 }
 
-export const getRandomTokens1 = (ethPrice = 3000): TokensStateT => {
-  const r = randomInteger(0, 100)
-  let r1 = randomInteger(1, 1000)
-  const tokenIn = r > 50 ? USDC_TOKEN : WETH_TOKEN
-  const tokenOut = tokenIn === WETH_TOKEN ? USDC_TOKEN : WETH_TOKEN
-  if (tokenIn === WETH_TOKEN) {
-    r1 = r1 / ethPrice
-  }
-
-  return { tokenIn, tokenOut, amountTokensIn: r1 }
-}
-
-export const getRandomTokens = (ethPrice = 3000): TokensStateT => {
+export const getRandomTokens = (
+  ethPrice = 3000,
+  isStable = false
+): TokensStateT => {
   const r = randomInteger(0, 100)
   let _r1 = randomInteger(1, 1000)
-  const tokenIn = r > 50 ? USDC_TOKEN : WETH_TOKEN
+  const tokenIn = r > 0 ? USDC_TOKEN : WETH_TOKEN
   const _tokenOut = tokenIn === WETH_TOKEN ? USDC_TOKEN : WETH_TOKEN
   if (tokenIn === WETH_TOKEN) {
     _r1 = _r1 / ethPrice
   }
-
+  if (isStable) {
+    return {
+      tokenIn: USDC_TOKEN,
+      tokenOut: WETH_TOKEN,
+      amountTokensIn: 1,
+    }
+  }
   return {
     tokenIn: USDC_TOKEN,
     tokenOut: WETH_TOKEN,
-    amountTokensIn: 1,
+    amountTokensIn: 40000,
   }
 }

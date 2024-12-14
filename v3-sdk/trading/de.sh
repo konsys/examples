@@ -1,0 +1,1 @@
+fuser -k -TERM -n tcp 8545
