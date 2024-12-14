@@ -26,6 +26,7 @@ const Example = () => {
   const [tradeList, setTradeList] = useState<Record<AddressT, TradeStateT>>()
   const [tokenBalance, setTokenBalance] = useState<UserBalanceT>()
   const [aliceUsdc, setAliceUsdc] = useState<number>(0)
+  const [percentWon, setPercentWon] = useState<number>(0)
   const [blockNumber, setBlockNumber] = useState<number>(0)
   const BobTrade = tradeList ? tradeList[BobAddress] : null
 
@@ -156,7 +157,7 @@ const Example = () => {
     const usdcPrice = +amountOut.toString() / 10e17
 
     const percentGr = ((aliceWethBalance - usdcPrice) / aliceWethBalance) * 100
-
+    setPercentWon(percentGr)
     if (aliceWethBalance === 0) {
       setAliceUsdc(tokenBalance ? tokenBalance['ALICE'].USDC : 0)
     }
@@ -206,7 +207,8 @@ const Example = () => {
       <div>{`Alice won Usdc: ${aliceUsdc}`}</div>
       <br />
       <div>{`WETH price: ${usdcPrice}`}</div>
-
+      <br />
+      <div>{`Won percent ${percentWon}`}</div>
       <br />
       <div>{`1 ETH =  ${ethPrice}`}</div>
       <br />

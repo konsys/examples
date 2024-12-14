@@ -79,8 +79,8 @@ export const getRandomTokens = (
     }
   }
   return {
-    tokenIn: USDC_TOKEN,
-    tokenOut: WETH_TOKEN,
-    amountTokensIn: 40000,
+    tokenIn,
+    tokenOut: _tokenOut,
+    amountTokensIn: _r1,
   }
 }

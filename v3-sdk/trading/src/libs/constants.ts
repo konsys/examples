@@ -92,6 +92,6 @@ export const BobAddress =
 export const BobWallet = createWallet(BobPK)
 export const AliceWallet = createWallet(AlicePK)
 
-export const TRADE_INTERVAL = 2000
+export const TRADE_INTERVAL = 1000
 export const amountUSDCToSell = 9
 export const feeAmount = FeeAmount.MEDIUM
