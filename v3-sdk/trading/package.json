@@ -24,6 +24,7 @@
     "start:chain": "anvil --chain-id 1337 --fork-url",
     "balance": "chmod +x ./to.sh && ./to.sh",
     "chain": "anvil --chain-id 1337 --fork-url https://mainnet.chainnodes.org/e284e639-5d41-484d-8ec3-be621cfb898f",
+    "chain1": "anvil --chain-id 1337 --fork-url https://eth-mainnet.nodereal.io/v1/ac055c64de1141c4a7d8c8d6df6b4994",
     "arb": "anvil --chain-id 1337 --fork-url https://arbitrum-one.chainnodes.org/e284e639-5d41-484d-8ec3-be621cfb898f",
     "ch": "yarn run chain && ./to.sh && yarn run balance"
   },
