@@ -1,11 +1,10 @@
 import './style.css'
 
 import { useQuery } from '@tanstack/react-query'
-import { Button } from 'antd'
+import { Button, Table } from 'antd'
 import { Wallet } from 'ethers'
 import React, { useCallback, useEffect, useState } from 'react'
 
-import { CurrentConfig, Environment } from '../config'
 import { useOnBlockUpdated } from '../hooks/useOnBlockUpdated'
 import {
   AliceAddress,
@@ -18,9 +17,8 @@ import {
   USDC_TOKEN,
   WETH_TOKEN,
 } from '../libs/constants'
-import { getProvider } from '../libs/providers'
 import { createTrade, executeTrade, getOutputQuote } from '../libs/trading'
-import { displayTrade, getRandomTokens, getUserBalance } from '../libs/utils'
+import { getRandomTokens, getUserBalance } from '../libs/utils'
 import { AddressT, TokensStateT, TradeStateT, UserBalanceT } from '../types'
 
 const Example = () => {
@@ -49,20 +47,6 @@ const Example = () => {
       BOB,
     })
   }, [])
-
-  const showBalance = useCallback(() => {
-    return tokenBalance ? (
-      <>
-        <div>{`Balance ALICE USDC: ${tokenBalance['ALICE'].USDC}`}</div>
-        <div>{`Balance ALICE WETH: ${tokenBalance['ALICE'].WETH}`}</div>
-        <br />
-        <div>{`Balance BOB USDC: ${tokenBalance['BOB'].USDC}`}</div>
-        <div>{`Balance BOB WETH: ${tokenBalance['BOB'].WETH}`}</div>
-      </>
-    ) : (
-      <span />
-    )
-  }, [tokenBalance])
 
   const getQuote = useCallback(
     async (tokens: TokensStateT, wallet: Wallet) => {
@@ -130,6 +114,9 @@ const Example = () => {
   })
 
   const aliceWethBalance = tokenBalance ? tokenBalance['ALICE'].WETH : 0
+  const aliceUSDCBalance = tokenBalance ? tokenBalance['ALICE'].USDC : 0
+  const bobUSDCBalance = tokenBalance ? tokenBalance['BOB'].USDC : 0
+  const bobWethBalance = tokenBalance ? tokenBalance['BOB'].WETH : 0
 
   const { data: aliceData } = useQuery({
     queryKey: [blockNumber],
@@ -185,34 +172,47 @@ const Example = () => {
     refetchInterval: TRADE_INTERVAL,
   })
 
+  const dataSource = [
+    {
+      id: 1,
+      aliceWethBalance,
+      aliceUSDCBalance,
+      bobWethBalance,
+      bobUSDCBalance,
+      aliceUsdc,
+      usdcPrice,
+      percentWon,
+      ethPrice,
+    },
+  ]
+
   return (
     <div className="App">
-      {CurrentConfig.rpc.mainnet === '' && (
-        <h2 className="error">Please set your mainnet RPC URL in config.ts</h2>
-      )}
-      {CurrentConfig.env === Environment.WALLET_EXTENSION &&
-        getProvider(BobWallet) === null && (
-          <h2 className="error">
-            Please install a wallet to use this example configuration
-          </h2>
-        )}
+      <Table
+        size="middle"
+        rowKey={'id'}
+        style={{ width: '500 px' }}
+        columns={[
+          {
+            dataIndex: 'aliceWethBalance',
+            title: 'Alice balance ETH',
+            width: 200,
+          },
+          {
+            dataIndex: 'aliceUSDCBalance',
+            title: 'Alice balance USDC',
+            width: 200,
+          },
+          { dataIndex: 'aliceUsdc', title: 'Alice USDC won', width: 200 },
+          { dataIndex: 'usdcPrice', title: 'USDC price', width: 200 },
+          { dataIndex: 'percentWon', title: 'Percent won', width: 200 },
+          { dataIndex: 'ethPrice', title: 'ETH price', width: 200 },
+          { dataIndex: 'bobWethBalance', title: 'Bob ETH', width: 200 },
+          { dataIndex: 'bobUSDCBalance', title: 'Bob USDC', width: 200 },
+        ]}
+        dataSource={dataSource}
+      />
 
-      <h3>{BobTrade?.trade && ` ${displayTrade(BobTrade.trade)}`}</h3>
-
-      <div>{`Block Number: ${blockNumber + 1}`}</div>
-      {showBalance()}
-
-      <br />
-      <div>{`Alice has WETH: ${aliceWethBalance}`}</div>
-      <br />
-      <div>{`Alice won Usdc: ${aliceUsdc}`}</div>
-      <br />
-      <div>{`WETH price: ${usdcPrice}`}</div>
-      <br />
-      <div>{`Won percent ${percentWon}`}</div>
-      <br />
-      <div>{`1 ETH =  ${ethPrice}`}</div>
-      <br />
       <Button
         onClick={() =>
           prepareTrade(BobWallet, getRandomTokens(ethPrice || 3000))
