@@ -7,7 +7,6 @@ import React, { useCallback, useEffect, useState } from 'react'
 
 import { useOnBlockUpdated } from '../hooks/useOnBlockUpdated'
 import {
-  AliceAddress,
   AliceWallet,
   AMOUNR_USDC_TO_SELL,
   BobAddress,
@@ -29,7 +28,7 @@ const Example = () => {
   const [blockNumber, setBlockNumber] = useState<number>(0)
   const BobTrade = tradeList ? tradeList[BobAddress] : null
 
-  const AliceTrade = tradeList ? tradeList[AliceAddress] : null
+  // const AliceTrade = tradeList ? tradeList[AliceAddress] : null
 
   useOnBlockUpdated(async (blockNumber: number) => {
     refreshBalances()
@@ -95,11 +94,11 @@ const Example = () => {
     [refreshBalances, tradeList]
   )
 
-  useEffect(() => {
-    if (AliceTrade) {
-      makeTrade(AliceTrade).then()
-    }
-  }, [AliceTrade, makeTrade])
+  // useEffect(() => {
+  //   if (AliceTrade) {
+  //     makeTrade(AliceTrade).then()
+  //   }
+  // }, [AliceTrade, makeTrade])
 
   useEffect(() => {
     if (BobTrade) {

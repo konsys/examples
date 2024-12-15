@@ -1,13 +1,13 @@
-import { Token } from '@uniswap/sdk-core'
+import { Token, TradeType } from '@uniswap/sdk-core'
+import { Trade } from '@uniswap/v3-sdk'
 import { Wallet } from 'ethers'
-
-import { TokenTrade } from './libs/trading'
 
 export type TokensStateT = {
   tokenIn: Token
   tokenOut: Token
   amountTokensIn: number
 }
+export type TokenTrade = Trade<Token, Token, TradeType>
 
 export type TokensAvailableT = Record<TokenName, Token>
 

@@ -11,7 +11,13 @@ import { ethers, Wallet } from 'ethers'
 import { Result } from 'ethers/lib/utils'
 import JSBI from 'jsbi'
 
-import { AddressT, TokensStateT, TradeStateT, TransactionState } from '../types'
+import {
+  AddressT,
+  TokensStateT,
+  TokenTrade,
+  TradeStateT,
+  TransactionState,
+} from '../types'
 import {
   ERC20_ABI,
   feeAmount,
@@ -22,8 +28,6 @@ import { MAX_FEE_PER_GAS, MAX_PRIORITY_FEE_PER_GAS } from './constants'
 import { getPoolInfo } from './pool'
 import { getProvider, sendTransaction } from './providers'
 import { fromReadableAmount } from './utils'
-
-export type TokenTrade = Trade<Token, Token, TradeType>
 
 export async function createTrade(
   tokensState: TokensStateT,
