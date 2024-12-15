@@ -7,6 +7,7 @@ import React, { useCallback, useEffect, useState } from 'react'
 
 import { useOnBlockUpdated } from '../hooks/useOnBlockUpdated'
 import {
+  AliceAddress,
   AliceWallet,
   AMOUNR_USDC_TO_SELL,
   BobAddress,
@@ -28,7 +29,7 @@ const Example = () => {
   const [blockNumber, setBlockNumber] = useState<number>(0)
   const BobTrade = tradeList ? tradeList[BobAddress] : null
 
-  // const AliceTrade = tradeList ? tradeList[AliceAddress] : null
+  const AliceTrade = tradeList ? tradeList[AliceAddress] : null
 
   useOnBlockUpdated(async (blockNumber: number) => {
     refreshBalances()
@@ -47,15 +48,9 @@ const Example = () => {
     })
   }, [])
 
-  const getQuote = useCallback(
-    async (tokens: TokensStateT, wallet: Wallet) => {
-      if (BobTrade?.trade) {
-        return await getOutputQuote(tokens, wallet)
-      }
-      return { amountOut: 0 }
-    },
-    [BobTrade?.trade]
-  )
+  const getQuote = useCallback(async (tokens: TokensStateT, wallet: Wallet) => {
+    return await getOutputQuote(tokens, wallet)
+  }, [])
 
   const { data } = useQuery({
     queryKey: [blockNumber],
@@ -94,11 +89,11 @@ const Example = () => {
     [refreshBalances, tradeList]
   )
 
-  // useEffect(() => {
-  //   if (AliceTrade) {
-  //     makeTrade(AliceTrade).then()
-  //   }
-  // }, [AliceTrade, makeTrade])
+  useEffect(() => {
+    if (AliceTrade) {
+      makeTrade(AliceTrade).then()
+    }
+  }, [AliceTrade, makeTrade])
 
   useEffect(() => {
     if (BobTrade) {
@@ -165,11 +160,11 @@ const Example = () => {
     return true
   }, [prepareTrade, getQuote, aliceWethBalance, tokenBalance])
 
-  useQuery({
-    queryKey: ['alicePrepare'],
-    queryFn: () => alicePrepare(),
-    refetchInterval: TRADE_INTERVAL,
-  })
+  // useQuery({
+  //   queryKey: ['alicePrepare'],
+  //   queryFn: () => alicePrepare(),
+  //   refetchInterval: TRADE_INTERVAL,
+  // })
 
   const dataSource = [
     {

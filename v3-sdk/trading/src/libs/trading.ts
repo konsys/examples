@@ -116,13 +116,8 @@ export async function getOutputQuote(
   amountOut: Result
   swapRoute: Route<Token, Token>
 }> {
-  if (!wallet) {
-    console.error('No wallet in getOutputQuote')
-    throw new Error('no wallet')
-  }
-
   const poolInfo = await getPoolInfo(tokensState, wallet)
-
+  console.log(234234, poolInfo)
   const pool = new Pool(
     tokensState.tokenIn,
     tokensState.tokenOut,
@@ -160,7 +155,6 @@ export async function getOutputQuote(
     to: QUOTER_CONTRACT_ADDRESS,
     data: calldata,
   })
-
   return {
     amountOut: ethers.utils.defaultAbiCoder.decode(
       ['uint256'],
