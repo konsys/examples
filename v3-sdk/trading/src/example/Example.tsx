@@ -23,13 +23,15 @@ const Example = () => {
   const [tokenBalance, setTokenBalance] = useState<UserBalanceT>()
   const BobTrade = tradeList ? tradeList[BobAddress] : null
 
+  console.log(11111, tokenBalance)
+
   useOnBlockUpdated(async () => {
     refreshBalances()
   }, BobWallet)
 
   // Update wallet state given a block number
   const refreshBalances = useCallback(async () => {
-    const tokens = [ARBITRUM_TOKEN, UNISWAP_TOKEN]
+    const tokens = [ARBITRUM_TOKEN, UNISWAP_TOKEN, USDT_TOKEN]
     const BOB = await getUserBalance(tokens, BobWallet)
 
     setTokenBalance({
@@ -43,8 +45,6 @@ const Example = () => {
 
   const prepareTrade = useCallback(
     async (wallet: Wallet, tokensState: TokensStateT) => {
-      console.log(11111, tokensState)
-
       await refreshBalances()
 
       const trade = await createTrade(tokensState, wallet)

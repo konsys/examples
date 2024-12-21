@@ -56,11 +56,6 @@ export async function createTrade(
 export async function executeTrade(
   trade: TradeStateT
 ): Promise<TransactionState | undefined> {
-  if (!trade.wallet || !trade.trade) {
-    console.error('No data in executeTrade')
-    throw new Error('no wallet')
-  }
-
   const provider = getProvider(trade.wallet)
 
   if (!provider) {
