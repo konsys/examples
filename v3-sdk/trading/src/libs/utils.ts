@@ -60,21 +60,12 @@ export function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms))
 }
 
-export const getRandomTokens = (isStable = false): TokensStateT => {
+export const getRandomTokens = (): TokensStateT => {
   const r = randomInteger(100, 1000)
-  const tokenIn = ARBITRUM_TOKEN
-  const _tokenOut = tokenIn === ARBITRUM_TOKEN ? USDT_TOKEN : ARBITRUM_TOKEN
 
-  if (isStable) {
-    return {
-      tokenIn: ARBITRUM_TOKEN,
-      tokenOut: USDT_TOKEN,
-      amountTokensIn: 1,
-    }
-  }
   return {
-    tokenIn,
-    tokenOut: _tokenOut,
+    tokenIn: ARBITRUM_TOKEN,
+    tokenOut: USDT_TOKEN,
     amountTokensIn: r,
   }
 }
