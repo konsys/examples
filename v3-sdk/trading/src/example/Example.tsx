@@ -14,19 +14,17 @@ import {
   UNISWAP_TOKEN,
   USDT_TOKEN,
 } from '../libs/constants'
-import { createTrade, executeTrade, getOutputQuote } from '../libs/trading'
+import { createTrade, executeTrade } from '../libs/trading'
 import { getRandomTokens, getUserBalance } from '../libs/utils'
 import { AddressT, TokensStateT, TradeStateT, UserBalanceT } from '../types'
 
 const Example = () => {
   const [tradeList, setTradeList] = useState<Record<AddressT, TradeStateT>>()
   const [tokenBalance, setTokenBalance] = useState<UserBalanceT>()
-  const [blockNumber, setBlockNumber] = useState<number>(0)
   const BobTrade = tradeList ? tradeList[BobAddress] : null
 
-  useOnBlockUpdated(async (blockNumber: number) => {
+  useOnBlockUpdated(async () => {
     refreshBalances()
-    setBlockNumber(blockNumber)
   }, BobWallet)
 
   // Update wallet state given a block number
@@ -38,23 +36,6 @@ const Example = () => {
       BOB,
     })
   }, [])
-
-  const getQuote = useCallback(async (tokens: TokensStateT, wallet: Wallet) => {
-    return await getOutputQuote(tokens, wallet)
-  }, [])
-
-  const { data } = useQuery({
-    queryKey: [blockNumber],
-    queryFn: () =>
-      getQuote(
-        { amountTokensIn: 1, tokenIn: ARBITRUM_TOKEN, tokenOut: USDT_TOKEN },
-        BobWallet
-      ),
-  })
-
-  const ethPrice = data?.amountOut
-    ? +data?.amountOut.toString() / 1000000
-    : 3000
 
   const makeTrade = useCallback(async (trade: TradeStateT) => {
     await executeTrade(trade)
@@ -92,15 +73,16 @@ const Example = () => {
     refetchInterval: TRADE_INTERVAL,
   })
 
-  const bobUSDCBalance = tokenBalance ? tokenBalance['BOB'].USDC : 0
-  const bobWethBalance = tokenBalance ? tokenBalance['BOB'].WETH : 0
+  const bobARBITRUMBalance = tokenBalance ? tokenBalance['BOB'].ARBITRUM : 0
+  const bobUNISWAPBalance = tokenBalance ? tokenBalance['BOB'].UNISWAP : 0
+  const bobUSDTBalance = tokenBalance ? tokenBalance['BOB'].USDT : 0
 
   const dataSource = [
     {
       id: 1,
-      bobWethBalance,
-      bobUSDCBalance,
-      ethPrice,
+      bobARBITRUMBalance,
+      bobUNISWAPBalance,
+      bobUSDTBalance,
     },
   ]
 
@@ -111,10 +93,17 @@ const Example = () => {
         rowKey={'id'}
         style={{ width: '500 px' }}
         columns={[
-          { dataIndex: 'arbitrumPrice', title: 'ARBITRUM price', width: 200 },
-          { dataIndex: 'uniswapPrice', title: 'UNISWAP price', width: 200 },
-          { dataIndex: 'bobWethBalance', title: 'Bob UNISWAP', width: 200 },
-          { dataIndex: 'bobUSDCBalance', title: 'Bob ARBITRUM', width: 200 },
+          {
+            dataIndex: 'bobARBITRUMBalance',
+            title: 'ARBITRUM balance',
+            width: 200,
+          },
+          {
+            dataIndex: 'bobUNISWAPBalance',
+            title: 'UNISWAP balance',
+            width: 200,
+          },
+          { dataIndex: 'bobUSDTBalance', title: 'USDT balance', width: 200 },
         ]}
         dataSource={dataSource}
       />
