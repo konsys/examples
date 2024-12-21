@@ -3,7 +3,7 @@ import { Trade } from '@uniswap/v3-sdk'
 import { BigNumber, ethers, Wallet } from 'ethers'
 
 import { TokenBalanceT, TokensStateT } from '../types'
-import { USDC_TOKEN, WETH_TOKEN } from './constants'
+import { ARBITRUM_TOKEN, USDT_TOKEN } from './constants'
 import { getProvider } from './providers'
 import { getCurrencyBalance } from './wallet'
 
@@ -60,27 +60,21 @@ export function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms))
 }
 
-export const getRandomTokens = (
-  ethPrice = 3000,
-  isStable = false
-): TokensStateT => {
+export const getRandomTokens = (isStable = false): TokensStateT => {
   const r = randomInteger(0, 100)
-  let _r1 = randomInteger(1, 10000)
-  const tokenIn = r > 25 ? USDC_TOKEN : WETH_TOKEN
-  const _tokenOut = tokenIn === WETH_TOKEN ? USDC_TOKEN : WETH_TOKEN
-  if (tokenIn === WETH_TOKEN) {
-    _r1 = _r1 / ethPrice
-  }
+  const tokenIn = r > 1 ? ARBITRUM_TOKEN : USDT_TOKEN
+  const _tokenOut = tokenIn === ARBITRUM_TOKEN ? USDT_TOKEN : ARBITRUM_TOKEN
+
   if (isStable) {
     return {
-      tokenIn: USDC_TOKEN,
-      tokenOut: WETH_TOKEN,
+      tokenIn: ARBITRUM_TOKEN,
+      tokenOut: USDT_TOKEN,
       amountTokensIn: 1,
     }
   }
   return {
     tokenIn,
     tokenOut: _tokenOut,
-    amountTokensIn: _r1,
+    amountTokensIn: r,
   }
 }

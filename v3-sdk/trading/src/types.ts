@@ -11,7 +11,7 @@ export type TokenTrade = Trade<Token, Token, TradeType>
 
 export type TokensAvailableT = Record<TokenName, Token>
 
-export type TokenName = 'WETH' | 'USDC' | 'USDT'
+export type TokenName = 'UNISWAP' | 'ARBITRUM' | 'USDT'
 
 export type AddressT = string
 export type PrivateKeyT = string

@@ -19,31 +19,35 @@ export const USDC_CONTRACT_ADDRESS =
   '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48'
 export const USDT_CONTRACT_ADDRESS =
   '0xdAC17F958D2ee523a2206206994597C13D831ec7'
+export const ARBITRUM_ARBITRUM_CONTRACT_ADDRESS =
+  '0x912CE59144191C1204E64559FE8253a0e49E6548'
+export const ARBITRUM_UNISWAP_CONTRACT_ADDRESS =
+  '0xFa7F8980b0f1E64A2062791cc3b0871572f1F7f0'
+export const ARBITRUM_USDT_CONTRACT_ADDRESS =
+  '0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9'
 
-export const WETH_TOKEN = new Token(
-  SupportedChainId.MAINNET,
-  '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
+export const ARBITRUM_TOKEN = new Token(
+  SupportedChainId.ARBITRUM_ONE,
+  ARBITRUM_ARBITRUM_CONTRACT_ADDRESS,
   18,
-  'WETH',
-  'Wrapped Ether'
+  'ARBITRUM',
+  'ARBITRUM'
 )
-
-export const USDC_TOKEN = new Token(
-  SupportedChainId.MAINNET,
-  USDC_CONTRACT_ADDRESS,
-  6,
-  'USDC',
-  'USD//C'
+export const UNISWAP_TOKEN = new Token(
+  SupportedChainId.ARBITRUM_ONE,
+  ARBITRUM_UNISWAP_CONTRACT_ADDRESS,
+  18,
+  'UNISWAP',
+  'UNISWAP'
 )
 
 export const USDT_TOKEN = new Token(
-  SupportedChainId.MAINNET,
-  USDT_CONTRACT_ADDRESS,
+  SupportedChainId.ARBITRUM_ONE,
+  ARBITRUM_USDT_CONTRACT_ADDRESS,
   6,
   'USDT',
   'USDT'
 )
-
 // ABI's
 
 export const ERC20_ABI = [
@@ -74,14 +78,10 @@ export const MAX_FEE_PER_GAS = 100000000000
 export const MAX_PRIORITY_FEE_PER_GAS = 100000000000
 
 export const TokensAvailable: TokensAvailableT = {
-  WETH: WETH_TOKEN,
-  USDC: USDC_TOKEN,
+  ARBITRUM: ARBITRUM_TOKEN,
+  UNISWAP: UNISWAP_TOKEN,
   USDT: USDT_TOKEN,
 }
-const AlicePK =
-  '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80' as PrivateKeyT
-export const AliceAddress =
-  '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266' as AddressT
 
 const BobPK =
   '0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d' as PrivateKeyT
@@ -90,9 +90,8 @@ export const BobAddress =
   '0x70997970C51812dc3A010C7d01b50e0d17dc79C8' as AddressT
 
 export const BobWallet = createWallet(BobPK)
-export const AliceWallet = createWallet(AlicePK)
 
-export const TRADE_INTERVAL = 2200
+export const TRADE_INTERVAL = 2500
 export const AMOUNR_USDC_TO_SELL = 9
 export const feeAmount = FeeAmount.MEDIUM
 
