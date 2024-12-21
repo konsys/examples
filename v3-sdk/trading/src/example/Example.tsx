@@ -43,6 +43,8 @@ const Example = () => {
 
   const prepareTrade = useCallback(
     async (wallet: Wallet, tokensState: TokensStateT) => {
+      console.log(11111, tokensState)
+
       await refreshBalances()
 
       const trade = await createTrade(tokensState, wallet)

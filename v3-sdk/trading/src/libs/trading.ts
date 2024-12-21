@@ -117,7 +117,6 @@ export async function getOutputQuote(
   swapRoute: Route<Token, Token>
 }> {
   const poolInfo = await getPoolInfo(tokensState, wallet)
-  console.log(234234, poolInfo)
   const pool = new Pool(
     tokensState.tokenIn,
     tokensState.tokenOut,
