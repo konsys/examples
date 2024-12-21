@@ -61,7 +61,7 @@ export function sleep(ms: number) {
 }
 
 export const getRandomTokens = (): TokensStateT => {
-  const r = randomInteger(100, 1000)
+  const r = randomInteger(1, 10)
 
   return {
     tokenIn: ARBITRUM_TOKEN,

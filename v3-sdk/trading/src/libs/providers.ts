@@ -78,7 +78,7 @@ async function sendTransactionViaWallet(
   while (receipt === null) {
     try {
       receipt = await provider.getTransactionReceipt(txRes.hash)
-
+      console.log('receipt ', receipt)
       if (receipt === null) {
         continue
       }

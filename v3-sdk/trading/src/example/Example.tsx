@@ -23,8 +23,6 @@ const Example = () => {
   const [tokenBalance, setTokenBalance] = useState<UserBalanceT>()
   const BobTrade = tradeList ? tradeList[BobAddress] : null
 
-  console.log(11111, tokenBalance)
-
   useOnBlockUpdated(async () => {
     refreshBalances()
   }, BobWallet)
@@ -33,7 +31,7 @@ const Example = () => {
   const refreshBalances = useCallback(async () => {
     const tokens = [ARBITRUM_TOKEN, UNISWAP_TOKEN, USDT_TOKEN]
     const BOB = await getUserBalance(tokens, BobWallet)
-
+    console.log('Block updated', BOB)
     setTokenBalance({
       BOB,
     })
